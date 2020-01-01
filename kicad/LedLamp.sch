@@ -164,18 +164,6 @@ Wire Wire Line
 Text Label 7400 1900 0    50   ~ 0
 Button
 $Comp
-L power:VCC #PWR0104
-U 1 1 5BD6723A
-P 8050 2250
-F 0 "#PWR0104" H 8050 2100 50  0001 C CNN
-F 1 "VCC" H 8067 2423 50  0000 C CNN
-F 2 "" H 8050 2250 50  0001 C CNN
-F 3 "" H 8050 2250 50  0001 C CNN
-	1    8050 2250
-	1    0    0    -1  
-$EndComp
-Connection ~ 7400 2250
-$Comp
 L power:VCC #PWR0106
 U 1 1 5BD6A609
 P 3250 1050
@@ -295,20 +283,7 @@ $EndComp
 Wire Wire Line
 	800  2200 1000 2200
 Wire Wire Line
-	7800 2250 8050 2250
-Wire Wire Line
 	7350 2250 7400 2250
-$Comp
-L Device:R R6
-U 1 1 5BD68949
-P 7650 2250
-F 0 "R6" V 7650 2250 50  0000 C CNN
-F 1 "10k" V 7534 2250 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 7580 2250 50  0001 C CNN
-F 3 "~" H 7650 2250 50  0001 C CNN
-	1    7650 2250
-	0    1    1    0   
-$EndComp
 $Comp
 L Device:R R4
 U 1 1 5BDCECC9
@@ -337,46 +312,20 @@ F 3 "" H 6550 2450 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	6550 2250 6550 2450
-$Comp
-L Device:C C1
-U 1 1 5BDD1FB2
-P 7400 2450
-F 0 "C1" H 7515 2496 50  0000 L CNN
-F 1 "0.1u" H 7515 2405 50  0000 L CNN
-F 2 "" H 7438 2300 50  0001 C CNN
-F 3 "~" H 7400 2450 50  0001 C CNN
-	1    7400 2450
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	7400 2250 7500 2250
-Wire Wire Line
-	7400 2250 7400 2300
-$Comp
-L power:GND #PWR02
-U 1 1 5BDD3565
-P 7400 2600
-F 0 "#PWR02" H 7400 2350 50  0001 C CNN
-F 1 "GND" H 7405 2427 50  0000 C CNN
-F 2 "" H 7400 2600 50  0001 C CNN
-F 3 "" H 7400 2600 50  0001 C CNN
-	1    7400 2600
-	1    0    0    -1  
-$EndComp
-Wire Notes Line
-	6300 1550 8350 1550
-Wire Notes Line
-	8350 1550 8350 3000
-Wire Notes Line
-	8350 3000 6300 3000
-Text Notes 7650 2950 0    50   ~ 0
-Button debouncer
-Wire Notes Line
-	6300 1550 6300 3000
+Text Notes 7350 2650 0    50   ~ 0
+Button
 Wire Wire Line
 	3100 2200 3100 2700
 Wire Wire Line
 	3850 2200 3850 2650
 Wire Wire Line
 	4750 2200 4750 2550
+Wire Notes Line
+	7800 1650 7800 2800
+Wire Notes Line
+	7800 2800 6300 2800
+Wire Notes Line
+	6300 2800 6300 1650
+Wire Notes Line
+	6300 1650 7800 1650
 $EndSCHEMATC
