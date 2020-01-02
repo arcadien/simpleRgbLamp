@@ -2,6 +2,7 @@
 #include <LowPower.h>
 #include <avr/power.h>
 #include<avr/interrupt.h>
+#include <EEPROM.h>
 
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -9,6 +10,9 @@
 #ifndef sbi
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
+
+int lastUsedColorAddressInEeprom = 0;
+
 
 struct Pins {
   static const uint8_t BUTTON = 2; // PD2
@@ -28,7 +32,7 @@ struct Color
 {
   // RGB intensities will be divided by this number.
   // It allows flexibility on global lamp light intensity
-  static const int INTENSITY_REDUCTION_FACTOR = 6;
+  static const int INTENSITY_REDUCTION_FACTOR = 10;
 
   Color(uint8_t red, uint8_t green, uint8_t blue) : RED(Reduce(red)), GREEN(Reduce(green)), BLUE(Reduce(blue)) {}
   uint8_t RED;
@@ -92,6 +96,9 @@ ISR(INT0_vect) {}
 
 void PrepareForSleep()
 {
+
+  EEPROM.put(lastUsedColorAddressInEeprom, rgbOrder);
+
   // PWM will be running in sleep mode,
   // we disable their interrupts here to
   // avoid immediate wakeup
@@ -100,16 +107,16 @@ void PrepareForSleep()
   TIMSK0 = 0;
   TIMSK1 = 0;
   TIMSK2 = 0;
-  
+
   // enable INT0 interrupt
   sbi(EIMSK, INT0);
 }
 
 void WakeUp() {
-  interruptBackup.Restore();
-
   // disable INT0
   cbi(EIMSK, INT0);
+  interruptBackup.Restore();
+  rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
 }
 
 
@@ -134,7 +141,9 @@ void setup() {
   // setup INT0 to fire on LOW level
   cbi(EICRA, ISC00);
   cbi(EICRA, ISC01);
-  
+
+  rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
+
   sei();
 }
 
