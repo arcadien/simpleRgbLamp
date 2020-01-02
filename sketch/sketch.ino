@@ -13,6 +13,10 @@
 
 int lastUsedColorAddressInEeprom = 0;
 
+static const uint16_t SECONDS_BEFORE_AUTO_DEEP_SLEEP = 3600 * 6;
+static const uint16_t _WDT_COUNT_BEFORE_DEEP_SLEEP = (SECONDS_BEFORE_AUTO_DEEP_SLEEP / 8);
+
+uint16_t wdt_it_counter;
 
 struct Pins {
   static const uint8_t BUTTON = 2; // PD2
@@ -66,6 +70,9 @@ struct InterruptBackup {
     _TIMSK0 = TIMSK0;
     _TIMSK1 = TIMSK1;
     _TIMSK2 = TIMSK2;
+    TIMSK0 = 0;
+    TIMSK1 = 0;
+    TIMSK2 = 0;
   }
 
   void Restore()
@@ -88,38 +95,14 @@ void ApplyColor()
   analogWrite(Pins::RED,    rgb_setup[rgbOrder].RED);
   analogWrite(Pins::GREEN,  rgb_setup[rgbOrder].GREEN);
   analogWrite(Pins::BLUE,   rgb_setup[rgbOrder].BLUE);
-
 }
 
 // just wake up
-ISR(INT0_vect) {}
+volatile bool buttonPressed;
 
-void PrepareForSleep()
-{
-
-  EEPROM.put(lastUsedColorAddressInEeprom, rgbOrder);
-
-  // PWM will be running in sleep mode,
-  // we disable their interrupts here to
-  // avoid immediate wakeup
-  interruptBackup.Save();
-
-  TIMSK0 = 0;
-  TIMSK1 = 0;
-  TIMSK2 = 0;
-
-  // enable INT0 interrupt
-  sbi(EIMSK, INT0);
+ISR(INT0_vect) {
+  buttonPressed = true;
 }
-
-void WakeUp() {
-  // disable INT0
-  cbi(EIMSK, INT0);
-  interruptBackup.Restore();
-  rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
-}
-
-
 
 void setup() {
 
@@ -132,38 +115,98 @@ void setup() {
   pinMode(Pins::BLUE, OUTPUT);
   pinMode(Pins::GREEN, OUTPUT);
 
-  pinMode(Pins::BUTTON, INPUT);
-
-  // trigger on LOW level, we can
+  // INT0 triggers on LOW level, we can
   // activate the internal pull-up
+  pinMode(Pins::BUTTON, INPUT);
   digitalWrite(Pins::BUTTON, HIGH);
+  EICRA = 0;
+  rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
+  buttonPressed = false;
+  wdt_it_counter = 0;
+  ApplyColor();
+}
 
-  // setup INT0 to fire on LOW level
-  cbi(EICRA, ISC00);
-  cbi(EICRA, ISC01);
+void Sleep8s()
+{
+  sbi(EIMSK, INT0);
+  interruptBackup.Save();
+  LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  interruptBackup.Restore();
+}
 
+void OnButtonPressed()
+{
+  buttonPressed = false;
+  rgbOrder++;
+  ApplyColor();
+  if (rgbOrder >= SHUTDOWN)
+  {
+    delay(200);
+    DeepSleep();
+  }
+  else
+  {
+    // save last non-dark color order
+    if (rgbOrder > 0 && rgbOrder < SHUTDOWN)
+    {
+      uint8_t _SREG = SREG;
+      cli();
+      EEPROM.put(lastUsedColorAddressInEeprom, rgbOrder);
+      SREG = _SREG;
+      delay(200);
+    }
+    Sleep8s();
+  }
+}
+
+void DeepSleep()
+{
+  rgbOrder = 0;
+  ApplyColor();
+  sbi(EIMSK, INT0);
+  interruptBackup.Save();
+  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+  interruptBackup.Restore();
+  ApplyColor();
+}
+
+void InactivityDeepSleep()
+{
+  rgbOrder = 0;
+  ApplyColor();
+  sbi(EIMSK, INT0);
+  interruptBackup.Save();
+  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+  interruptBackup.Restore();
   rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
 
-  sei();
+  // do not interpret the button press when just waking
+  // up from inactivity deep sleep
+  buttonPressed = false;
+
+  ApplyColor();
 }
+
 
 void loop() {
 
-  // disable ext. interrupt
   cbi(EIMSK, INT0);
 
-  ApplyColor();
-  delay(250);
-
-  if (rgbOrder >= SHUTDOWN)
+  if (buttonPressed == true)
   {
-    rgbOrder = 0;
-    PrepareForSleep();
-    LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
-    WakeUp();
+    OnButtonPressed();
   }
-  PrepareForSleep();
-  LowPower.idle(SLEEP_FOREVER, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-  WakeUp();
-  rgbOrder++;
+  else
+  {
+    wdt_it_counter++;
+    if (wdt_it_counter >= _WDT_COUNT_BEFORE_DEEP_SLEEP)
+    {
+      wdt_it_counter = 0;
+      InactivityDeepSleep();
+    }
+    else
+    {
+      Sleep8s();
+    }
+  }
 }
