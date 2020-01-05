@@ -4,6 +4,8 @@ The behaviour is simple : Once it starts, the first color is red. A push on the 
 When in deep sleep, the power consumption is minimized to some µA (the Pro mini is powered directly on the VCC pin, so there is no DC regulator consumption).
 When user push the button again, the firmware wakes up and color cycle stars with red again.
 
+NOTE: After 6 hours, the lamp will automatically go to deep sleep, until user pushes the button.
+
 The repository contains:
 * An Arduino sketch to drive the lamp (the actual target is a Atmel ATmega328P on an Arduino pro mini)
 * The [Kicad](http://kicad-pcb.org/) schema 
