@@ -104,6 +104,9 @@ ISR(INT0_vect) {
   buttonPressed = true;
 }
 
+ISR (PCINT2_vect) {
+}
+
 void setup() {
 
   // All pins as input
@@ -134,6 +137,17 @@ void Sleep8s()
   interruptBackup.Restore();
 }
 
+void DeepSleep()
+{
+  rgbOrder = 0;
+  ApplyColor();
+  sbi(EIMSK, INT0);
+  interruptBackup.Save();
+  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+  interruptBackup.Restore();
+  ApplyColor();
+}
+
 void OnButtonPressed()
 {
   buttonPressed = false;
@@ -159,16 +173,7 @@ void OnButtonPressed()
   }
 }
 
-void DeepSleep()
-{
-  rgbOrder = 0;
-  ApplyColor();
-  sbi(EIMSK, INT0);
-  interruptBackup.Save();
-  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
-  interruptBackup.Restore();
-  ApplyColor();
-}
+
 
 void InactivityDeepSleep()
 {
