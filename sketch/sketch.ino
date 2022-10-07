@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <LowPower.h>
 #include <avr/power.h>
-#include<avr/interrupt.h>
+#include <avr/interrupt.h>
 #include <EEPROM.h>
+#include <avr/wdt.h> 
 
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -18,13 +19,13 @@ static const uint16_t _WDT_COUNT_BEFORE_DEEP_SLEEP = (SECONDS_BEFORE_AUTO_DEEP_S
 
 uint16_t wdt_it_counter;
 
-struct Pins {
+struct Pins
+{
   static const uint8_t BUTTON = 2; // PD2
   static const uint8_t GREEN = 3;
   static const uint8_t BLUE = 6;
   static const uint8_t RED = 9;
 };
-
 
 /*!
    a RGB color
@@ -47,20 +48,20 @@ struct Color
   {
     return (in / INTENSITY_REDUCTION_FACTOR);
   }
-
 };
 
 static const Color rgb_setup[7] = {
-  Color(0,   0, 0)   /* blackout */,
-  Color(255, 0, 0)   /* RED   */,
-  Color(0, 255, 0)   /* GREEN */,
-  Color(0, 0, 255) /* BLUE  */,
-  Color(230, 90, 30)  /* PINK  */  ,
-  Color(255, 88, 0)   /* ORANGE */,
-  Color(0, 0, 0)   /* blackout */,
+    Color(0, 0, 0) /* blackout */,
+    Color(255, 0, 0) /* RED   */,
+    Color(0, 255, 0) /* GREEN */,
+    Color(0, 0, 255) /* BLUE  */,
+    Color(230, 90, 30) /* PINK  */,
+    Color(255, 88, 0) /* ORANGE */,
+    Color(0, 0, 0) /* blackout */,
 };
 
-struct InterruptBackup {
+struct InterruptBackup
+{
   uint8_t _TIMSK0;
   uint8_t _TIMSK1;
   uint8_t _TIMSK2;
@@ -84,31 +85,42 @@ struct InterruptBackup {
 };
 InterruptBackup interruptBackup;
 
-
 uint8_t rgbOrder = 1;
 static const uint8_t SHUTDOWN = 6;
 
 void ApplyColor()
 {
 
-  if (rgbOrder > SHUTDOWN) rgbOrder = 0;
-  analogWrite(Pins::RED,    rgb_setup[rgbOrder].RED);
-  analogWrite(Pins::GREEN,  rgb_setup[rgbOrder].GREEN);
-  analogWrite(Pins::BLUE,   rgb_setup[rgbOrder].BLUE);
+  if (rgbOrder > SHUTDOWN)
+    rgbOrder = 0;
+  analogWrite(Pins::RED, rgb_setup[rgbOrder].RED);
+  analogWrite(Pins::GREEN, rgb_setup[rgbOrder].GREEN);
+  analogWrite(Pins::BLUE, rgb_setup[rgbOrder].BLUE);
 }
 
-// just wake up
+// just ²ke up
 volatile bool buttonPressed;
+volatile bool movementDetected;
 
-ISR(INT0_vect) {
+void it_OnButtonPressed()
+{
   buttonPressed = true;
 }
 
-ISR (PCINT2_vect) {
+ISR(PCINT2_vect)
+{
+  movementDetected = true;
 }
 
-void setup() {
+ISR(PCINT0_vect)
+{
+  movementDetected = true;
+}
 
+void setup()
+{
+
+  Serial.begin(115200);
   // All pins as input
   DDRB = 0;
   DDRC = 0;
@@ -118,20 +130,29 @@ void setup() {
   pinMode(Pins::BLUE, OUTPUT);
   pinMode(Pins::GREEN, OUTPUT);
 
+  // PB2 (10) state change
+  sbi(PCIFR, PCIF0);
+  sbi(PCMSK0, PCINT2 | PCINT3 | PCINT4);
+
   // INT0 triggers on LOW level, we can
   // activate the internal pull-up
-  pinMode(Pins::BUTTON, INPUT);
-  digitalWrite(Pins::BUTTON, HIGH);
-  EICRA = 0;
+  pinMode(Pins::BUTTON, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(2), it_OnButtonPressed, LOW);
+
+  // EICRA = 0;
   rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
   buttonPressed = false;
   wdt_it_counter = 0;
   ApplyColor();
+  sei();
 }
 
 void Sleep8s()
 {
+  Serial.println("Sleep8s");
+  delay(100);
   sbi(EIMSK, INT0);
+  sbi(PCMSK0, PCINT2);
   interruptBackup.Save();
   LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   interruptBackup.Restore();
@@ -139,9 +160,13 @@ void Sleep8s()
 
 void DeepSleep()
 {
+  Serial.println("DeepSleep");
+  delay(100);
   rgbOrder = 0;
   ApplyColor();
+  wdt_disable();
   sbi(EIMSK, INT0);
+  sbi(PCMSK0, PCINT2);
   interruptBackup.Save();
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
   interruptBackup.Restore();
@@ -150,7 +175,6 @@ void DeepSleep()
 
 void OnButtonPressed()
 {
-  buttonPressed = false;
   rgbOrder++;
   ApplyColor();
   if (rgbOrder >= SHUTDOWN)
@@ -173,13 +197,14 @@ void OnButtonPressed()
   }
 }
 
-
-
 void InactivityDeepSleep()
 {
+  Serial.println("InactivityDeepSleep");
+  delay(100);
   rgbOrder = 0;
   ApplyColor();
   sbi(EIMSK, INT0);
+  sbi(PCMSK0, PCINT2);
   interruptBackup.Save();
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
   interruptBackup.Restore();
@@ -192,13 +217,22 @@ void InactivityDeepSleep()
   ApplyColor();
 }
 
-
-void loop() {
+void loop()
+{
 
   cbi(EIMSK, INT0);
+  cbi(PCMSK0, PCINT2);
 
-  if (buttonPressed == true)
+  if (movementDetected == true)
   {
+    Serial.println("Movement detected");
+    movementDetected = false;
+    OnButtonPressed();
+  }
+  else if (buttonPressed == true)
+  {
+    Serial.println("Button pressed");
+    buttonPressed = false;
     OnButtonPressed();
   }
   else
