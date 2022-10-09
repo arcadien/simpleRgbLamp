@@ -2,8 +2,7 @@
 #include <LowPower.h>
 #include <avr/power.h>
 #include <avr/interrupt.h>
-#include <EEPROM.h>
-#include <avr/wdt.h> 
+#include <avr/wdt.h>
 
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -12,9 +11,13 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
+#define ACTIVATE_MOVEMENT_INTERRUPT() sbi(PCMSK1, PCINT12)
+#define SUSPEND_MOVEMENT_INTERRUPT() cbi(PCMSK1, PCINT12)
+#define IS_MOVEMENT_DETECTED() HIGH == (digitalRead(A4))
+
 int lastUsedColorAddressInEeprom = 0;
 
-static const uint16_t SECONDS_BEFORE_AUTO_DEEP_SLEEP = 3600 * 6;
+static const uint16_t SECONDS_BEFORE_AUTO_DEEP_SLEEP = 3600 * 6; // 6h of light
 static const uint16_t _WDT_COUNT_BEFORE_DEEP_SLEEP = (SECONDS_BEFORE_AUTO_DEEP_SLEEP / 8);
 
 uint16_t wdt_it_counter;
@@ -50,8 +53,7 @@ struct Color
   }
 };
 
-static const Color rgb_setup[7] = {
-    Color(0, 0, 0) /* blackout */,
+static const Color rgb_setup[6] = {
     Color(255, 0, 0) /* RED   */,
     Color(0, 255, 0) /* GREEN */,
     Color(0, 0, 255) /* BLUE  */,
@@ -85,167 +87,196 @@ struct InterruptBackup
 };
 InterruptBackup interruptBackup;
 
-uint8_t rgbOrder = 1;
-static const uint8_t SHUTDOWN = 6;
+uint8_t rgbOrder = 0;
+static const uint8_t SHUTDOWN = 5;
 
 void ApplyColor()
 {
-
-  if (rgbOrder > SHUTDOWN)
-    rgbOrder = 0;
-  analogWrite(Pins::RED, rgb_setup[rgbOrder].RED);
-  analogWrite(Pins::GREEN, rgb_setup[rgbOrder].GREEN);
-  analogWrite(Pins::BLUE, rgb_setup[rgbOrder].BLUE);
+  if (rgbOrder < 6)
+  {
+    analogWrite(Pins::RED, rgb_setup[rgbOrder].RED);
+    analogWrite(Pins::GREEN, rgb_setup[rgbOrder].GREEN);
+    analogWrite(Pins::BLUE, rgb_setup[rgbOrder].BLUE);
+  }
+#if defined(DEBUG)
+  else
+  {
+    Serial.print("ApplyColor(): rgbOrder has inconsistent value: ");
+    Serial.println(rgbOrder);
+  }
+#endif
 }
 
-// just ²ke up
 volatile bool buttonPressed;
-volatile bool movementDetected;
+volatile bool buttonSwitched;
+volatile bool movementSensorStateHasChanged;
 
-void it_OnButtonPressed()
+void Sleep8s()
 {
-  buttonPressed = true;
+#if defined(DEBUG)
+  Serial.println("Sleep8s");
+  delay(100);
+#endif
+  interruptBackup.Save();
+  LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  interruptBackup.Restore();
+}
+void DeepSleep()
+{
+#if defined(DEBUG)
+  Serial.println("DeepSleep");
+  delay(100);
+#endif
+  wdt_disable();
+  interruptBackup.Save();
+  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+  interruptBackup.Restore();
 }
 
-ISR(PCINT2_vect)
+ISR(PCINT1_vect)
 {
-  movementDetected = true;
+  SUSPEND_MOVEMENT_INTERRUPT();
+  movementSensorStateHasChanged = true;
 }
 
-ISR(PCINT0_vect)
+void it_OnButtonChanged()
 {
-  movementDetected = true;
+  buttonSwitched = true;
 }
 
 void setup()
 {
+  cli();
 
+#if defined(DEBUG)
   Serial.begin(115200);
+#endif
   // All pins as input
   DDRB = 0;
   DDRC = 0;
   DDRD = 0;
 
+  // no ADC
+  cbi(ADCSRA, ADEN);
+
   pinMode(Pins::RED, OUTPUT);
   pinMode(Pins::BLUE, OUTPUT);
   pinMode(Pins::GREEN, OUTPUT);
 
-  // PB2 (10) state change
-  sbi(PCIFR, PCIF0);
-  sbi(PCMSK0, PCINT2 | PCINT3 | PCINT4);
-
   // INT0 triggers on LOW level, we can
   // activate the internal pull-up
   pinMode(Pins::BUTTON, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(2), it_OnButtonPressed, LOW);
+  attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, LOW);
 
-  // EICRA = 0;
-  rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
-  buttonPressed = false;
-  wdt_it_counter = 0;
+  // PC0 (A4) state change
+  pinMode(A4, INPUT);
+  sbi(PCICR, PCIE1);
+  ACTIVATE_MOVEMENT_INTERRUPT();
+
+  // EEPROM.put(lastUsedColorAddressInEeprom, rgbOrder);
+  // rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
+  rgbOrder = 0;
   ApplyColor();
+
+  wdt_it_counter = 0;
+  buttonPressed = false;
+  movementSensorStateHasChanged = false;
   sei();
 }
 
-void Sleep8s()
-{
-  Serial.println("Sleep8s");
-  delay(100);
-  sbi(EIMSK, INT0);
-  sbi(PCMSK0, PCINT2);
-  interruptBackup.Save();
-  LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-  interruptBackup.Restore();
-}
-
-void DeepSleep()
-{
-  Serial.println("DeepSleep");
-  delay(100);
-  rgbOrder = 0;
-  ApplyColor();
-  wdt_disable();
-  sbi(EIMSK, INT0);
-  sbi(PCMSK0, PCINT2);
-  interruptBackup.Save();
-  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
-  interruptBackup.Restore();
-  ApplyColor();
-}
-
-void OnButtonPressed()
+void incrementRgbOrder()
 {
   rgbOrder++;
-  ApplyColor();
-  if (rgbOrder >= SHUTDOWN)
+  if (rgbOrder > 5)
   {
-    delay(200);
-    DeepSleep();
+    rgbOrder = 0;
   }
-  else
-  {
-    // save last non-dark color order
-    if (rgbOrder > 0 && rgbOrder < SHUTDOWN)
-    {
-      uint8_t _SREG = SREG;
-      cli();
-      EEPROM.put(lastUsedColorAddressInEeprom, rgbOrder);
-      SREG = _SREG;
-      delay(200);
-    }
-    Sleep8s();
-  }
-}
-
-void InactivityDeepSleep()
-{
-  Serial.println("InactivityDeepSleep");
-  delay(100);
-  rgbOrder = 0;
-  ApplyColor();
-  sbi(EIMSK, INT0);
-  sbi(PCMSK0, PCINT2);
-  interruptBackup.Save();
-  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
-  interruptBackup.Restore();
-  rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
-
-  // do not interpret the button press when just waking
-  // up from inactivity deep sleep
-  buttonPressed = false;
-
-  ApplyColor();
 }
 
 void loop()
 {
-
-  cbi(EIMSK, INT0);
-  cbi(PCMSK0, PCINT2);
-
-  if (movementDetected == true)
+  if (movementSensorStateHasChanged == true)
   {
-    Serial.println("Movement detected");
-    movementDetected = false;
-    OnButtonPressed();
-  }
-  else if (buttonPressed == true)
-  {
-    Serial.println("Button pressed");
-    buttonPressed = false;
-    OnButtonPressed();
-  }
-  else
-  {
-    wdt_it_counter++;
-    if (wdt_it_counter >= _WDT_COUNT_BEFORE_DEEP_SLEEP)
+    movementSensorStateHasChanged = false;
+    ACTIVATE_MOVEMENT_INTERRUPT();
+    if (IS_MOVEMENT_DETECTED())
     {
-      wdt_it_counter = 0;
-      InactivityDeepSleep();
+#if defined(DEBUG)
+      Serial.println("Movement detected");
+      delay(10);
+#endif
     }
     else
     {
-      Sleep8s();
+#if defined(DEBUG)
+      Serial.println("End of movement detected");
+      delay(10);
+#endif
+      wdt_it_counter = _WDT_COUNT_BEFORE_DEEP_SLEEP;
     }
   }
+
+  if (buttonSwitched)
+  {
+    buttonSwitched = false;
+#if defined(DEBUG)
+    Serial.print("Button switched to ");
+#endif
+    if (buttonPressed)
+    {
+      buttonPressed = false;
+#if defined(DEBUG)
+      Serial.println("released");
+#endif
+      attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, LOW);
+    }
+    else
+    {
+      buttonPressed = true;
+#if defined(DEBUG)
+      Serial.println("pressed");
+#endif
+      incrementRgbOrder();
+      ApplyColor();
+      if (rgbOrder == SHUTDOWN)
+      {
+        rgbOrder = 0;
+        wdt_it_counter = _WDT_COUNT_BEFORE_DEEP_SLEEP;
+        attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, LOW);
+      }
+      else
+      {
+        attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, HIGH);
+      }
+      delay(200); // debounce
+    }
+  }
+
+  wdt_it_counter++;
+  if (wdt_it_counter >= _WDT_COUNT_BEFORE_DEEP_SLEEP)
+  {
+    wdt_it_counter = 0;
+
+    // movement does not wake up when deep sleeping
+    SUSPEND_MOVEMENT_INTERRUPT();
+
+    DeepSleep();
+
+    detachInterrupt(digitalPinToInterrupt(2));
+    ACTIVATE_MOVEMENT_INTERRUPT();
+
+    // it_OnButtonChanged woke up MCU.
+    // we do not want to interpret this
+    // as a color change but just wakeup.
+    buttonSwitched = false;
+    buttonPressed = false;
+
+    ApplyColor();
+    delay(500);
+
+    // wait for press again, forget release
+    attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, LOW);
+  }
+
+  Sleep8s();
 }
