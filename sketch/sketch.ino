@@ -15,12 +15,13 @@
 #define SUSPEND_MOVEMENT_INTERRUPT() cbi(PCMSK1, PCINT12)
 #define IS_MOVEMENT_DETECTED() HIGH == (digitalRead(A4))
 
-int lastUsedColorAddressInEeprom = 0;
-
-static const uint16_t SECONDS_BEFORE_AUTO_DEEP_SLEEP = 3600 * 6; // 6h of light
-static const uint16_t _WDT_COUNT_BEFORE_DEEP_SLEEP = (SECONDS_BEFORE_AUTO_DEEP_SLEEP / 8);
+static const uint16_t SECONDS_BEFORE_AUTO_DEEP_SLEEP = 3600 * 6;
+static const uint16_t WDT_COUNT_BEFORE_DEEP_SLEEP = (SECONDS_BEFORE_AUTO_DEEP_SLEEP / 8);
 
 uint16_t wdt_it_counter;
+
+uint8_t rgbOrder = 0;
+static const uint8_t SHUTDOWN = 5;
 
 struct Pins
 {
@@ -87,8 +88,7 @@ struct InterruptBackup
 };
 InterruptBackup interruptBackup;
 
-uint8_t rgbOrder = 0;
-static const uint8_t SHUTDOWN = 5;
+
 
 void ApplyColor()
 {
@@ -121,6 +121,7 @@ void Sleep8s()
   LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   interruptBackup.Restore();
 }
+
 void DeepSleep()
 {
 #if defined(DEBUG)
@@ -173,8 +174,6 @@ void setup()
   sbi(PCICR, PCIE1);
   ACTIVATE_MOVEMENT_INTERRUPT();
 
-  // EEPROM.put(lastUsedColorAddressInEeprom, rgbOrder);
-  // rgbOrder = EEPROM.read(lastUsedColorAddressInEeprom);
   rgbOrder = 0;
   ApplyColor();
 
@@ -212,7 +211,7 @@ void loop()
       Serial.println("End of movement detected");
       delay(10);
 #endif
-      wdt_it_counter = _WDT_COUNT_BEFORE_DEEP_SLEEP;
+      wdt_it_counter = WDT_COUNT_BEFORE_DEEP_SLEEP;
     }
   }
 
@@ -241,7 +240,7 @@ void loop()
       if (rgbOrder == SHUTDOWN)
       {
         rgbOrder = 0;
-        wdt_it_counter = _WDT_COUNT_BEFORE_DEEP_SLEEP;
+        wdt_it_counter = WDT_COUNT_BEFORE_DEEP_SLEEP;
         attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, LOW);
       }
       else
@@ -253,7 +252,7 @@ void loop()
   }
 
   wdt_it_counter++;
-  if (wdt_it_counter >= _WDT_COUNT_BEFORE_DEEP_SLEEP)
+  if (wdt_it_counter >= WDT_COUNT_BEFORE_DEEP_SLEEP)
   {
     wdt_it_counter = 0;
 
