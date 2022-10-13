@@ -196,6 +196,10 @@ void incrementRgbOrder()
 
 void loop()
 {
+  int lightValue = analogRead(A0);
+  DEBUG("Light value:");
+  DEBUG_LN(lightValue);
+
   if (movementSensorStateHasChanged == true)
   {
     movementSensorStateHasChanged = false;
