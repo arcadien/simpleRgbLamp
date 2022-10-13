@@ -200,6 +200,17 @@ void loop()
   DEBUG("Light value:");
   DEBUG_LN(lightValue);
 
+  int batlevel = analogRead(A1);
+  batlevel += analogRead(A1);
+  batlevel += analogRead(A1);
+  batlevel += analogRead(A1);
+  batlevel = batlevel >> 2; // divide by 4
+
+  float voltage = batlevel * (5000 / 1024);
+  DEBUG("Battery tension:");
+  DEBUG(voltage);
+  DEBUG_LN("v");
+
   if (movementSensorStateHasChanged == true)
   {
     movementSensorStateHasChanged = false;
