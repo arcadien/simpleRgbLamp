@@ -23,6 +23,18 @@ uint16_t wdt_it_counter;
 uint8_t rgbOrder = 0;
 static const uint8_t SHUTDOWN = 5;
 
+#define DEBUG
+#if defined(DEBUG)
+#define DEBUG(message)   \
+  Serial.print(message); \
+  delay(20);
+#define DEBUG_LN(message)  \
+  Serial.println(message); \
+  delay(20);
+#else
+#define DEBUG(message)
+#define DEBUG_LN(message)
+#endif
 struct Pins
 {
   static const uint8_t BUTTON = 2; // PD2
@@ -88,8 +100,6 @@ struct InterruptBackup
 };
 InterruptBackup interruptBackup;
 
-
-
 void ApplyColor()
 {
   if (rgbOrder < 6)
@@ -98,13 +108,11 @@ void ApplyColor()
     analogWrite(Pins::GREEN, rgb_setup[rgbOrder].GREEN);
     analogWrite(Pins::BLUE, rgb_setup[rgbOrder].BLUE);
   }
-#if defined(DEBUG)
   else
   {
-    Serial.print("ApplyColor(): rgbOrder has inconsistent value: ");
-    Serial.println(rgbOrder);
+    DEBUG("ApplyColor(): rgbOrder has inconsistent value: ");
+    DEBUG_LN(rgbOrder);
   }
-#endif
 }
 
 volatile bool buttonPressed;
@@ -113,10 +121,7 @@ volatile bool movementSensorStateHasChanged;
 
 void Sleep8s()
 {
-#if defined(DEBUG)
-  Serial.println("Sleep8s");
-  delay(100);
-#endif
+  DEBUG_LN("Sleep8s");
   interruptBackup.Save();
   LowPower.idle(SLEEP_8S, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   interruptBackup.Restore();
@@ -124,10 +129,7 @@ void Sleep8s()
 
 void DeepSleep()
 {
-#if defined(DEBUG)
-  Serial.println("DeepSleep");
-  delay(100);
-#endif
+  DEBUG_LN("DeepSleep");
   wdt_disable();
   interruptBackup.Save();
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
@@ -200,17 +202,11 @@ void loop()
     ACTIVATE_MOVEMENT_INTERRUPT();
     if (IS_MOVEMENT_DETECTED())
     {
-#if defined(DEBUG)
-      Serial.println("Movement detected");
-      delay(10);
-#endif
+      DEBUG_LN("Movement detected");
     }
     else
     {
-#if defined(DEBUG)
-      Serial.println("End of movement detected");
-      delay(10);
-#endif
+      DEBUG_LN("End of movement detected");
       wdt_it_counter = WDT_COUNT_BEFORE_DEEP_SLEEP;
     }
   }
@@ -218,23 +214,17 @@ void loop()
   if (buttonSwitched)
   {
     buttonSwitched = false;
-#if defined(DEBUG)
-    Serial.print("Button switched to ");
-#endif
+    DEBUG_LN("Button switched to ");
     if (buttonPressed)
     {
       buttonPressed = false;
-#if defined(DEBUG)
-      Serial.println("released");
-#endif
+      DEBUG_LN("released");
       attachInterrupt(digitalPinToInterrupt(2), it_OnButtonChanged, LOW);
     }
     else
     {
       buttonPressed = true;
-#if defined(DEBUG)
-      Serial.println("pressed");
-#endif
+      DEBUG_LN("pressed");
       incrementRgbOrder();
       ApplyColor();
       if (rgbOrder == SHUTDOWN)
