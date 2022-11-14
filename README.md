@@ -15,13 +15,13 @@ A multi-mode RGB lamp, which:
 
 | Identifier             | Description                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| [HLR1](../../issues/1) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)                                  |
-| [HLR2](../../issues/2) | PSML measure ambient light and does not power up if luminosity is more than MAX_LIGHT_FOR_POWER_ON                           |
-| [HLR3](../../issues/3) | PSML wakes up when it detects movement around, and go back to deep sleeps after MOVEMENT_COOLDOWN_IN_MINUTES of non-movement |
-| [HLR4](../../issues/4) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)                                  |
-| [HLR5](../../issues/5) | PSML transmit its remaning battery level wirelessly, each EMIT_COOLDOWN_IN_MINUTES                                           |
-| [HLR6](../../issues/6) | PSML transmit light intensity wirelessly, each EMIT_COOLDOWN_IN_MINUTES                                                      |
-| [HLR7](../../issues/7) | Long press (2 seconds) on push button toggles permanent light mode                                                           |
+| [HLR1](../../issues/2) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)                                  |
+| [HLR2](../../issues/3) | PSML measure ambient light and does not power up if luminosity is more than MAX_LIGHT_FOR_POWER_ON                           |
+| [HLR3](../../issues/4) | PSML wakes up when it detects movement around, and go back to deep sleeps after MOVEMENT_COOLDOWN_IN_MINUTES of non-movement |
+| [HLR4](../../issues/5) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)                                  |
+| [HLR5](../../issues/6) | PSML transmit its remaning battery level wirelessly, each EMIT_COOLDOWN_IN_MINUTES                                           |
+| [HLR6](../../issues/7) | PSML transmit light intensity wirelessly, each EMIT_COOLDOWN_IN_MINUTES                                                      |
+| [HLR7](../../issues/8) | Long press (2 seconds) on push button toggles permanent light mode                                                           |
 
 ## Architecture
 
@@ -119,13 +119,12 @@ end
 
 | Identifier              | Component | Description                                                          |
 | ----------------------- | --------- | -------------------------------------------------------------------- |
-| [LLR1](../../issues/5)  |           | PSML sense battery voltage using ADC (PC1) channel in millivolts     |
-| [LLR1](../../issues/6)  |           | PSML sense ambient lig voltage using ADC (PC1) channel in millivolts |
-| [LLR2](../../issues/6)  |           | PSML is awaken when `PB2` pin is driven low                          |
-| [LLR3](../../issues/7)  |           | PSML emits battery voltage in millivolt using X10Meter protocol      |
-| [LLR4](../../issues/8)  |           | PSML emits total water consumption in liters using X10Meter protocol |
-| [LLR5](../../issues/9)  |           | PSML detects metal disc movement through the CNY70 wired on `PA0`    |
-| [LLR6](../../issues/10) |           | PSML                                                                 |
+| [LLR1](../../issues/6)  |           | PSML sense battery voltage using ADC (PC1) channel in millivolts     |
+| [LLR1](../../issues/7)  |           | PSML sense ambient lig voltage using ADC (PC1) channel in millivolts |
+| [LLR2](../../issues/8)  |           | PSML is awaken when `PB2` pin is driven low                          |
+| [LLR3](../../issues/9)  |           | PSML emits battery voltage in millivolt using X10Meter protocol      |
+| [LLR4](../../issues/10) |           | PSML emits total water consumption in liters using X10Meter protocol |
+| [LLR5](../../issues/11) |           | PSML detects metal disc movement through the CNY70 wired on `PA0`    |
 
 # Hardware
 
