@@ -1,4 +1,5 @@
 @startuml
+!theme superhero
 skinparam component {
     backgroundColor<<hardSoft>> Green
     backgroundColor<<soft>> Gray

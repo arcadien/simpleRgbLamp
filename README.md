@@ -27,7 +27,58 @@ A multi-mode RGB lamp, which:
 
 ### Component diagram
 
-![components diagram](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://github.com/arcadien/simpleRgbLamp/blob/spec/requirements/architecture.iuml)
+```puml {align="center"}
+!theme superhero
+skinparam component {
+    backgroundColor<<hardSoft>> Green
+    backgroundColor<<soft>> Grey
+    backgroundColor<<softHard>> Orange
+}
+
+component "Arduino pro mini" {
+  port "PC0 (A0)"
+  port "PC1 (A1)"
+  port "PC4 (18)"
+  port "PB0 (8)"
+  port "PB1 (9)"
+  port "PD2 (2)"
+  port "PD3 (3)"
+  port "PD6 (6)"
+}
+
+
+
+package "PSML" {
+
+ [AnalogReader] <<hardSoft>>
+ [PushButton] <<hardSoft>>
+ [LedsDriver] <<softHard>>
+ [X10Encoder] <<softHard>>
+ [PresenceSensor] <<hardSoft>>
+
+ "PC0 (A0)" -down-> [AnalogReader]
+ "PC1 (A1)" -down-> [AnalogReader]
+ "PD2 (2)"  -down-> [PushButton]
+ "PC4 (18)" -down-> [PresenceSensor]
+
+[X10MessageFactory] <<soft>>
+[StateMachine] <<soft>>
+
+ AnalogReader -> X10MessageFactory : D_tension_in_mv
+ AnalogReader -> X10MessageFactory : D_luminosity
+ PushButton -> StateMachine : D_ButtonPressed
+ PushButton -> StateMachine : D_ButtonLongPressed
+ StateMachine -> LedsDriver : D_Color
+ StateMachine -> X10Encoder : D_EmitData
+ PresenceSensor -> StateMachine : D_presenceDetectionState
+
+ [X10MessageFactory] -> [X10Encoder] : D_RadioMessage
+ [LedsDriver] -down-> "PB1 (9)"
+ [LedsDriver] -down-> "PD6 (6)"
+ [LedsDriver] -down-> "PD3 (3)"
+ [X10Encoder] -down-> "PB0 (8)"
+}
+```
 
 ### sequence diagram
 
