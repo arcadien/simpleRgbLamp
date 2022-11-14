@@ -119,12 +119,12 @@ end
 
 | Identifier              | Component | Description                                                                             |
 | ----------------------- | --------- | --------------------------------------------------------------------------------------- |
-| [LLR1](../../issues/6)  |           | PSML sense battery voltage using ADC (PC1) channel in millivolts                        |
-| [LLR2](../../issues/7)  |           | PSML sense ambient light using ADC (PC1) channel in raw ADC value, compared against VCC |
-| [LLR3](../../issues/8)  |           | PSML is awaken when `PB2` pin is driven low                                             |
-| [LLR4](../../issues/9)  |           | PSML emits battery voltage in millivolt using X10Meter protocol                         |
-| [LLR5](../../issues/10) |           | PSML emits total water consumption in liters using X10Meter protocol                    |
-| [LLR6](../../issues/11) |           | PSML detects metal disc movement through the CNY70 wired on `PA0`                       |
+| [LLR1](../../issues/9)  |           | PSML sense battery voltage using ADC (PC1) channel in millivolts                        |
+| [LLR2](../../issues/10)  |           | PSML sense ambient light using ADC (PC1) channel in raw ADC value, compared against VCC |
+| [LLR3](../../issues/11)  |           | PSML is awaken when `PB2` pin is driven low                                             |
+| [LLR4](../../issues/12)  |           | PSML emits battery voltage in millivolt using X10Meter protocol                         |
+| [LLR5](../../issues/13) |           | PSML emits total water consumption in liters using X10Meter protocol                    |
+| [LLR6](../../issues/14) |           | PSML detects metal disc movement through the CNY70 wired on `PA0`                       |
 
 # Hardware
 
