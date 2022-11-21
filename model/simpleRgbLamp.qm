@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="5.2.3" links="0">
+ <framework name="qpc"/>
+ <package name="RgbLamp" stereotype="0x05"/>
+</model>
