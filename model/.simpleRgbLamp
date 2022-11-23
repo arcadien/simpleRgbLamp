@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <session version="5.2.3">
- <item name="license"></item>
+ <item name="license">GPL</item>
  <group name="locked"/>
  <group name="settings">
   <item name="tabs">1</item>
@@ -8,7 +8,13 @@
   <item name="grid">3</item>
   <item name="backups">0</item>
  </group>
- <group name="windows"/>
+ <group name="windows">
+  <item id="Classes::SimpleRgbLamp::SM">0,0,640,480</item>
+  <item id="../src::main.c">0,0,1813,1052</item>
+  <item id="../include::qpn_conf.h">0,0,673,1043,*</item>
+  <item id="../src::bsp.c">1139,752,674,300</item>
+  <item id="../src::SimpleRgbLamp.c">0,752,674,300</item>
+ </group>
  <group name="search">
   <item name="options">2032128</item>
   <item name="replace">0</item>
