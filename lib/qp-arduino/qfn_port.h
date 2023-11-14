@@ -1,13 +1,16 @@
-/*****************************************************************************
-* Product: QP-nano configuration for Arduino-AVR
-* Last updated for version 6.8.0
-* Last updated on  2020-03-08
+/**
+* @file
+* @brief QF-nano port AVR ATmega, QV-nano kernel, GNU-AVR toolset, Arduino
+* @cond
+******************************************************************************
+* Last Updated for Version: 6.8.2
+* Date of the Last Update:  2021-07-07
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
 *                    Modern Embedded Software
 *
-* Copyright (C) 2005-2020 Quantum Leaps, LLC. All rights reserved.
+* Copyright (C) 2005-2021 Quantum Leaps, LLC. All rights reserved.
 *
 * This program is open source software: you can redistribute it and/or
 * modify it under the terms of the GNU General Public License as published
@@ -30,13 +33,17 @@
 * Contact information:
 * <www.state-machine.com/licensing>
 * <info@state-machine.com>
-*****************************************************************************/
-#ifndef QPN_CONF_H
-#define QPN_CONF_H
+******************************************************************************
+* @endcond
+*/
+#ifndef QFN_PORT_H
+#define QFN_PORT_H
 
-#define Q_PARAM_SIZE            4U
-#define QF_MAX_TICK_RATE        1U
-#define QF_TIMEEVT_CTR_SIZE     2U
-#define QF_TIMEEVT_PERIODIC
-
-#endif  /* QPN_CONF_H */
+#if defined(IS_CROSS)
+#include "qfn_port_avr.h"
+#elif defined(IS_NATIVE)
+#include "qfn_port_native.h"
+#elif defined(IS_TEST)
+#include "qfn_port_native.h"
+#endif
+#endif /* QFN_PORT_H */

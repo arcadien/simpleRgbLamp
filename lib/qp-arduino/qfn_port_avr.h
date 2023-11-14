@@ -36,8 +36,10 @@
 ******************************************************************************
 * @endcond
 */
+
 #ifndef QFN_PORT_H
-#define QFN_PORT_H
+#error use #include "qfn_port.h"
+#endif
 
 /* GNU-AVR function attribute for "no-return" function */
 #define Q_NORETURN   __attribute__ ((noreturn)) void
@@ -64,6 +66,8 @@
 /* QF CPU reset for AVR */
 #define QF_RESET()       __asm__ __volatile__ ("jmp 0x0000" ::)
 
+#define LOG(message)
+
 #include <stdint.h>      /* Exact-width types. WG14/N843 C99 Standard */
 #include <stdbool.h>     /* Boolean type.      WG14/N843 C99 Standard */
 //#include <Arduino.h>   /* Don't include, C++ not compatible with C */
@@ -83,5 +87,3 @@
 * executes ATOMICALLY, and so no interrupt can be serviced between these
 * instructins. You should NEVER separate these two lines.
 */
-
-#endif /* QFN_PORT_H */
