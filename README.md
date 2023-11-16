@@ -44,18 +44,6 @@ NOTE: _data_ is a value which is exchanged between components
  D_X10Message,D_SendBatteryVoltage         --> X10Encoder ----------------> HW
 ```
 
-## Low level requirements
-
-| Identifier              | Component | Description                                                                                                                                        |
-| ----------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [LLR1](../../issues/5)  |           | Rogers sense battery voltage using ADC (PC1) channel in millivolts                                                                                 |
-| [LLR2](../../issues/6)  |           | Rogers is awaken when `PB2` pin is driven low                                                                                                      |
-| [LLR3](../../issues/7)  |           | Rogers emits battery voltage in millivolt using X10Meter protocol                                                                                  |
-| [LLR4](../../issues/8)  |           | Rogers emits total water consumption in liters using X10Meter protocol                                                                             |
-| [LLR5](../../issues/9)  |           | Rogers detects metal disc movement through the CNY70 wired on `PA0`                                                                                |
-| [LLR6](../../issues/10) |           | Rogers count a new consumed liter when the CNY70 value follow a model OUT_OF_DISK_ANALOG_VALUE -> ON_DISK_ANALOG_VALUE -> OUT_OF_DISK_ANALOG_VALUE |
-| [LLR7]                  |           | If for some reason Rogers is locked in a CNY70 value model detection for more than 10 seconds, then detection is aborted                           |
-
 # Hardware
 
 ## Architecture
@@ -83,13 +71,13 @@ NOTE: _data_ is a value which is exchanged between components
 | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
 | HWR0       | Unless specified, all pins shall be set as 'input/pull up' for lower power consumption                                  |
 | HWR1       | photoresistor shall be wired on `PC0 (A0)`, configured as analog input, throught a voltage divider using a 10k resistor |
-| HWR2       | Presence sensor signal shall be wired on `PC4`                                                                          |
-| HWR3       | Battery (VBatt) shall be wired on Presence sensor signal is wired on `PC1 (A1)`, configured as analog input             |
+| HWR2       | Presence sensor signal shall be wired on `PC4` (Arduino Pro mini A4)                                                    |
+| HWR3       | Battery (VBatt) shall be wired on Presence sensor signal is wired on `PC1` (Arduino Pro mini A1)                        |
 | HWR4       | Battery shall be wired on a DC/DC converter so that Vcc is always 5v                                                    |
 | HWR5       | 433Mhz emmitter shall be wired on `PB0 (8)` pin                                                                         |
-| HWR6       | The three leds outputs are RED `PB1 (9)`, Green `PD1 (3)` , Blue ` PD6 (6)`                                             |
-| HWR7       | Leds shall be driver by transistor rather that pins to avoid too high power draw                                        |
-| HWR8       | Push button shall be wired on `PD2 (2)`                                                                                 |
+| HWR6       | The three leds outputs are RED `PB1` (Arduino Pro mini 9), Green `PD1` (Arduino Pro mini 3), Blue ` PD6`  (Arduino Pro mini 6)                                            |
+| HWR7       | Leds shall be driver by transistor/MOSFET rather that pins to avoid too high power draw                                 |
+| HWR8       | Push button shall be wired on `PD2` (Arduino Pro mini 2)                                                                |
 
 # Non functional requirements
 
