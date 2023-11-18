@@ -1,0 +1,925 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="5.1.3" links="0">
+ <documentation>See README.md fro details</documentation>
+ <framework name="qpn"/>
+ <package name="AOs" stereotype="0x02">
+  <class name="RgbNightLight" superclass="qpn::QActive">
+   <statechart properties="0x01">
+    <initial target="../1/1">
+     <initial_glyph conn="66,13,4,0,9,14,2">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="Active">
+     <entry>PRINT(&quot;RgbNightLight_Active enter&quot;);
+</entry>
+     <exit>PRINT(&quot;RgbNightLight_Active exit&quot;);</exit>
+     <tran trig="Q_BUTTON_PRESS" target="../1">
+      <action>PRINT(&quot;RgbNightLight: Q_BUTTON_PRESS received&quot;);
+Light_nextColor(&amp;light);</action>
+      <tran_glyph conn="23,61,3,2,57,-16">
+       <action box="1,-8,46,11"/>
+      </tran_glyph>
+     </tran>
+     <state name="Permanent">
+      <entry>PRINT(&quot;NL Permanent enter&quot;);
+Light_on(&amp;light);</entry>
+      <exit>PRINT(&quot;NL Permanent exit&quot;);</exit>
+      <tran trig="Q_BUTTON_LONG_PRESS" target="../../2">
+       <action>PRINT(&quot;RgbNightLight: Q_BUTTON_LONG_PRESS received&quot;);</action>
+       <tran_glyph conn="84,45,2,0,16,30,8">
+        <action box="2,10,53,6"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="68,24,58,21">
+       <entry box="1,2,40,9"/>
+       <exit box="1,11,37,8"/>
+      </state_glyph>
+     </state>
+     <state name="MovementDetection">
+      <entry>PRINT(&quot;NL MovementDetection enter&quot;);
+QActive_armX(&amp;me-&gt;super, 1U, 500);</entry>
+      <exit>PRINT(&quot;NL MovementDetection exit&quot;);
+QActive_disarmX(&amp;me-&gt;super, 1U);</exit>
+      <initial target="../3">
+       <initial_glyph conn="101,74,4,0,4">
+        <action box="0,-2,10,2"/>
+       </initial_glyph>
+      </initial>
+      <tran trig="Q_BUTTON_LONG_PRESS" target="../../1">
+       <action>PRINT(&quot;RgbNightLight: Q_BUTTON_LONG_PRESS received&quot;);</action>
+       <tran_glyph conn="151,69,0,2,-22,-62,-2">
+        <action box="1,-12,49,6"/>
+       </tran_glyph>
+      </tran>
+      <tran trig="Q_TIMEOUT1">
+       <action>BSP_CheckMovement();
+</action>
+       <tran_glyph conn="188,85,1,-1,-24">
+        <action box="-29,-7,32,7"/>
+       </tran_glyph>
+      </tran>
+      <state name="Motionless">
+       <entry>PRINT(&quot;NL MovementDetection MotionLess enter&quot;);
+Light_off(&amp;light);
+</entry>
+       <exit>PRINT(&quot;NL MovementDetection MotionLess exit&quot;);</exit>
+       <tran trig="Q_MOTION_SENSOR" target="../../4">
+        <action>PRINT(&quot;Motion detected&quot;);</action>
+        <tran_glyph conn="70,89,3,3,-11,33,14">
+         <action box="-31,9,23,6"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="70,78,86,21">
+        <entry box="1,2,57,12"/>
+        <exit box="1,14,56,7"/>
+       </state_glyph>
+      </state>
+      <state name="Motion">
+       <entry>PRINT(&quot;NL MovementDetection Motion enter&quot;);
+Light_on(&amp;light);</entry>
+       <exit>PRINT(&quot;NL MovementDetection Motion exit&quot;);</exit>
+       <tran trig="Q_END_MOTION_SENSOR" target="../../3">
+        <action>PRINT(&quot;End of motion&quot;);</action>
+        <tran_glyph conn="158,117,1,1,3,-31,-5">
+         <action box="4,-19,27,6"/>
+        </tran_glyph>
+       </tran>
+       <tran trig="Q_MOTION_SENSOR">
+        <action>PRINT(&quot;Rearm mvmt&quot;);
+//QActive_armX(&amp;me-&gt;super, 1U, 500);</action>
+        <tran_glyph conn="158,116,1,-1,-37">
+         <action box="-35,-7,35,8"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="73,105,85,19">
+        <entry box="1,2,51,9"/>
+        <exit box="1,11,46,5"/>
+       </state_glyph>
+      </state>
+      <state_glyph node="37,69,151,56">
+       <entry box="1,2,30,9"/>
+       <exit box="1,11,30,9"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="23,18,184,111">
+      <entry box="1,2,29,6"/>
+      <exit box="1,8,29,6"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="286,135"/>
+   </statechart>
+  </class>
+  <class name="Button" superclass="qpn::QActive">
+   <statechart properties="0x01">
+    <initial target="../1">
+     <initial_glyph conn="28,5,4,0,7">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="Up">
+     <entry>PRINT(&quot;Button_Up entry&quot;);</entry>
+     <exit>PRINT(&quot;Button_Up exit&quot;);</exit>
+     <tran trig="Q_BUTTON_SWITCH" target="../../2">
+      <tran_glyph conn="72,18,1,3,22">
+       <action box="1,-3,19,3"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="4,12,68,20">
+      <entry box="1,2,61,9"/>
+      <exit box="1,11,31,7"/>
+     </state_glyph>
+    </state>
+    <state name="Down">
+     <entry>PRINT(&quot;Button_Down enter&quot;);
+QActive_armX(&amp;me-&gt;super, 0U, LONG_PRESS_DURATION);
+</entry>
+     <exit>QActive_disarmX(&amp;me-&gt;super, 0U);
+PRINT(&quot;Button_Down exit&quot;);</exit>
+     <tran trig="Q_BUTTON_SWITCH" target="../../1">
+      <action>QACTIVE_POST((QActive *)&amp;AO_RgbNightLight, Q_BUTTON_PRESS_SIG, 0U);
+</action>
+      <tran_glyph conn="94,29,3,1,-13,0,-9">
+       <action box="1,-3,58,9"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="Q_TIMEOUT" target="../../3">
+      <tran_glyph conn="94,48,3,1,-19">
+       <action box="-14,-3,14,4"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="94,8,59,47">
+      <entry box="1,2,51,8"/>
+      <exit box="1,10,43,6"/>
+     </state_glyph>
+    </state>
+    <state name="Long_Pressed">
+     <entry>PRINT(&quot;Long_Pressed enter&quot;);
+QACTIVE_POST((QActive *)&amp;AO_RgbNightLight, Q_BUTTON_LONG_PRESS_SIG, 0U);</entry>
+     <exit>PRINT(&quot;Long_Pressed exit&quot;);</exit>
+     <tran trig="Q_BUTTON_SWITCH" target="../../1">
+      <tran_glyph conn="27,54,3,2,-13,-22">
+       <action box="-12,-18,20,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="27,43,48,17">
+      <entry box="1,2,35,9"/>
+      <exit box="1,11,32,4"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="157,64"/>
+   </statechart>
+  </class>
+  <class name="Light">
+   <attribute name="lastColorIndex" type="uint8_t" visibility="0x00" properties="0x00"/>
+   <operation name="off" type="void" visibility="0x00" properties="0x00">
+    <code>BSP_ShowColor(rgb_setup[COLOR_OFF]);
+BSP_Println(&quot;Light_off&quot;);
+</code>
+   </operation>
+   <operation name="on" type="void" visibility="0x00" properties="0x00">
+    <code>BSP_Println(&quot;Light_on&quot;);
+BSP_ShowColor(rgb_setup[me-&gt;lastColorIndex]);</code>
+   </operation>
+   <operation name="nextColor" type="void" visibility="0x00" properties="0x00">
+    <code>BSP_Println(&quot;Light_nextColor&quot;);
+me-&gt;lastColorIndex++;
+if(me-&gt;lastColorIndex &gt; COLOR_OFF){
+    me-&gt;lastColorIndex = 0;
+}
+BSP_ShowColor(rgb_setup[me-&gt;lastColorIndex]);</code>
+   </operation>
+  </class>
+ </package>
+ <directory name="../src">
+  <file name="rgbNightLight.cpp">
+   <text>#include &quot;qpn.h&quot;
+#include &quot;rgbNightLight.hpp&quot;
+#include &quot;bsp.hpp&quot;
+
+#if defined(IS_CROSS)
+#include &quot;Arduino.h&quot;
+#define PRINT(message) Serial.println(message); delay(10);
+#else
+#define PRINT(message) printf(&quot;%s\n&quot;, message);
+#endif
+
+struct RgbNightLight AO_RgbNightLight;
+struct Button AO_Button;
+Light light;
+
+// Event queues
+static QEvt l_rgbNightLightQSto[20];
+static QEvt l_buttonQSto[20];
+
+QActiveCB const Q_ROM QF_active[] = {
+    { (QActive *)0,           (QEvt *)0, 0U                                               },
+    { (QActive *)&amp;AO_RgbNightLight,      l_rgbNightLightQSto,  Q_DIM(l_rgbNightLightQSto) },
+    { (QActive *)&amp;AO_Button,             l_buttonQSto,         Q_DIM(l_buttonQSto)        }
+
+};
+
+void RgbNightLight_ctor(void) {
+    RgbNightLight * const me = &amp;AO_RgbNightLight;
+    QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;RgbNightLight_initial));
+}
+
+void Button_ctor(void) {
+    Button * const me = &amp;AO_Button;
+    QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Button_initial));
+}
+
+
+//============================================================================
+// define all AO classes (state machine)...
+$define${AOs::RgbNightLight}
+$define${AOs::Button}
+$define${AOs::Light}
+//...
+</text>
+  </file>
+  <file name="bsp.hpp">
+   <text>#ifndef BSP_HPP
+#define BSP_HPP
+
+
+// RGB intensities will be divided by this number.
+// It allows flexibility on global lamp light intensity
+#define INTENSITY_REDUCTION_FACTOR  10
+
+#if defined(IS_CROSS)
+enum {
+    BSP_TICKS_PER_SEC = 500,
+    SHORT_PRESS_DURATION = 50,
+    LONG_PRESS_DURATION = 500
+};
+#else
+enum {
+    BSP_TICKS_PER_SEC = 490,
+    SHORT_PRESS_DURATION = 2,
+    LONG_PRESS_DURATION = 4
+};
+#endif
+
+typedef struct Color{
+    uint8_t RED;
+    uint8_t GREEN;
+    uint8_t BLUE;
+}Color;
+
+
+
+enum COLORS {
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_BLUE,
+    COLOR_PINK,
+    COLOR_ORANGE,
+    COLOR_OFF
+};
+
+static const Color rgb_setup[COLOR_OFF+1] = {
+    { /* RED */
+        .RED=255/INTENSITY_REDUCTION_FACTOR,
+        .GREEN=0,
+        .BLUE=0
+    },
+    { /* GREEN */
+        .RED=0,
+        .GREEN=255/INTENSITY_REDUCTION_FACTOR,
+        .BLUE=0
+    },
+    { /* BLUE */
+        .RED=0,
+        .GREEN=0,
+        .BLUE=255/INTENSITY_REDUCTION_FACTOR
+    },
+    { /* PINK */
+        .RED=230/INTENSITY_REDUCTION_FACTOR,
+        .GREEN=90/INTENSITY_REDUCTION_FACTOR,
+        .BLUE=30/INTENSITY_REDUCTION_FACTOR
+    },
+    { /* ORANGE */
+        .RED=255/INTENSITY_REDUCTION_FACTOR,
+        .GREEN=88/INTENSITY_REDUCTION_FACTOR,
+        .BLUE=0
+    },
+    { /* blackout */
+        .RED=0,
+        .GREEN=0,
+        .BLUE=0
+    }
+};
+
+/**
+* Write a message on a defined output
+*/
+void BSP_Println(const char* message);
+
+/**
+* Initial setup
+*
+*/
+void BSP_initSetup(void);
+
+/**
+* Clocking setup
+* TODO: merge in BSP_initSetup?
+*/
+void BSP_initTick(void);
+
+/**
+* Power on the light
+*/
+void BSP_Led_On();
+
+/**
+* Power off the light
+*/
+void BSP_Led_Off();
+
+/**
+* Display specific color
+*/
+void BSP_ShowColor(Color color);
+
+/**
+*
+* Fires Q_MOTION_SENSOR if motion is detected
+*/
+void BSP_CheckMovement();
+
+/**
+* Return a value for ambient light (No unit)
+*/
+float BSP_getAmbientLight(void);
+
+/**
+* Return battery voltage in mV
+*/
+float BSP_getBatteryVoltage(void);
+
+/**
+* Sleep some time
+*/
+void BSP_Sleep(void);
+#endif // BSP_HPP
+</text>
+  </file>
+  <file name="rgbNightLight.hpp">
+   <text>#ifndef RGBNIGHTLIGHT_HPP
+#define RGBNIGHTLIGHT_HPP
+
+enum RgbNightLightSignals {
+    TIME_TICK_SIG = Q_USER_SIG,
+    Q_BUTTON_SWITCH_SIG,
+    Q_BUTTON_PRESS_SIG,
+    Q_BUTTON_LONG_PRESS_SIG,
+    Q_BUTTON_RELEASED_SIG,
+    Q_LONG_TIMEOUT_SIG,
+    Q_SHORT_TIMEOUT_SIG,
+    Q_MOTION_SENSOR_SIG,
+    Q_WAKEUP_SIG,
+    Q_END_MOTION_SENSOR_SIG,
+    MAX_SIG  /* the last signal */
+};
+
+void RgbNightLight_ctor(void);
+void Button_ctor(void);
+
+$declare${AOs::RgbNightLight}
+$declare${AOs::Button}
+$declare${AOs::Light}
+
+// AO instances and event queue buffers for them...
+extern struct RgbNightLight AO_RgbNightLight;
+extern struct Button AO_Button;
+
+
+
+extern QActiveCB const Q_ROM QF_active[3];
+
+#endif // RGBNIGHTLIGHT_HPP
+</text>
+  </file>
+  <file name="bsp_328p.cpp">
+   <text>/* This file has been prepared for Doxygen **************************/
+
+/*! \file bsp_uno.ino *************************************************
+*
+* \brief Arduino Board Support Package for the Arduino-UNO
+*
+* Copyright (C) 2021 W.Nijs (ALF4all)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+*
+* \author   W.Nijs.
+* \date     04/01/2021
+* \version  1.0 04/01/2021, initial revision, W.Nijs
+*
+*********************************************************************/
+/*****************************************************************//**
+* Include section
+*  Add all #includes here.
+*********************************************************************/
+#include &quot;qpn.h&quot;       // QP-nano framework
+#include &quot;rgbNightLight.hpp&quot;  // rgbNightLight interface
+#include &quot;bsp.hpp&quot;     // BSP for this application
+#include &quot;Arduino.h&quot;  // Main include file for the Arduino SDK
+#include &quot;LowPower.h&quot;
+
+/*****************************************************************//**
+* Define section
+*  Add all #defines here.
+*********************************************************************/
+
+
+struct Pins
+{
+  static const uint8_t BUTTON = 2;    // PD2
+  static const uint8_t MOVEMENT = A4; // PC4
+  static const uint8_t GREEN = 3;
+  static const uint8_t BLUE = 6;
+  static const uint8_t RED = 9;
+} Pins;
+
+
+/*****************************************************************//**
+* ISR button
+*********************************************************************/
+void ISR_buttonChange() {
+    QACTIVE_POST_ISR((QActive *)&amp;AO_Button, Q_BUTTON_SWITCH_SIG, 0U);
+};
+
+
+/*****************************************************************//**
+* ISR movement
+*********************************************************************/
+ISR (PCINT0_vect) {
+    // digitalRead(A4) == HIGH
+    if(PINC &amp; B00010000){
+        QACTIVE_POST_ISR((QActive *)&amp;AO_RgbNightLight, Q_MOTION_SENSOR_SIG, 0U);
+    }else{
+        QACTIVE_POST_ISR((QActive *)&amp;AO_RgbNightLight, Q_END_MOTION_SENSOR_SIG, 0U);
+    }
+};
+
+//============================================================================
+
+
+static void activateOneColorFor1s(uint8_t pin){
+  analogWrite(Pins::RED,   0);
+  analogWrite(Pins::GREEN, 0);
+  analogWrite(Pins::BLUE,  0);
+  analogWrite(pin, 255);
+  delay(1000);
+}
+
+
+/*****************************************************************//**
+* BSP_initSetup()
+*********************************************************************/
+void BSP_initSetup(void) {
+
+  // Serial
+  Serial.begin(115200);
+  Serial.println(&quot;--- RGB Night light starting ---&quot;);
+
+  // leds
+  pinMode(Pins::RED, OUTPUT);
+  pinMode(Pins::BLUE, OUTPUT);
+  pinMode(Pins::GREEN, OUTPUT);
+
+  activateOneColorFor1s(Pins::RED);
+  activateOneColorFor1s(Pins::GREEN);
+  activateOneColorFor1s(Pins::BLUE);
+
+  // button
+  pinMode(Pins::BUTTON, INPUT_PULLUP); // set the BUTTON pin to input
+  attachInterrupt(digitalPinToInterrupt(Pins::BUTTON),ISR_buttonChange,CHANGE);
+
+  //pinMode(Pins::MOVEMENT, INPUT);
+  //PCICR |= B00000010; // We activate the interrupts of the PC port
+  //PCMSK1 |= B00010000; // We activate the interrupts on pin A4
+
+  Serial.begin(115200);
+
+};
+
+/*****************************************************************//**
+* BSP_initTick()
+*********************************************************************/
+void BSP_initTick(void) {
+
+//#define SHUNT_GREEN_LED
+#if defined(SHUNT_GREEN_LED)
+// set Timer2 in CTC mode, 1/1024 prescaler, start the timer ticking...
+  TCCR2A = (1U &lt;&lt; WGM21) | (0U &lt;&lt; WGM20);
+  TCCR2B = (1U &lt;&lt; CS22) | (1U &lt;&lt; CS21) | (1U &lt;&lt; CS20); // 1/2^10
+  ASSR &amp;= ~(1U &lt;&lt; AS2);
+  TIMSK2 = (1U &lt;&lt; OCIE2A); // enable TIMER2 compare Interrupt
+  TCNT2 = 0U;
+  // set the output-compare register based on the desired tick frequency
+  OCR2A = (F_CPU / BSP_TICKS_PER_SEC / 1024U) - 1U;
+#else
+
+  // use this to keep the stock PWM config on timer2
+  // each 16 Mhz / 64 / 510 (2ms)
+  TIMSK2 |= (1 &lt;&lt; TOIE2); // enable TIMER2 overflow Interrupt
+#endif
+};
+
+void BSP_Println(const char* message)
+{
+    Serial.println(message);
+    delay(10);
+}
+
+volatile uint16_t timer2OverflowCounter;
+ISR(TIMER2_OVF_vect) {
+  // send ticks each 10ms
+  if(timer2OverflowCounter &gt;= 5){
+
+      QF_tickXISR(0); // process time events for tick rate 0
+      QF_tickXISR(1); // process time events for tick rate 1
+
+      timer2OverflowCounter = 0;
+  }
+  timer2OverflowCounter++;
+}
+/*****************************************************************//**
+* ISR TIMER2 COMPA
+*********************************************************************/
+ISR(TIMER2_COMPA_vect) {
+  QACTIVE_POST_ISR((QActive *)&amp;AO_Button, TIME_TICK_SIG, 0U);
+  QF_tickXISR(0); // process time events for tick rate 0
+};
+
+
+//============================================================================
+// QF callbacks...
+void QF_onStartup(void) {
+    BSP_initTick();
+}
+//............................................................................
+void QV_onIdle(void) {   // called with interrupts DISABLED
+
+    // Put the CPU and peripherals to the low-power mode. You might
+    // need to customize the clock management for your application,
+    // see the datasheet for your particular AVR MCU.
+    //QV_CPU_SLEEP();  // atomically go to sleep and enable interrupts
+    LowPower.idle(SLEEP_FOREVER, ADC_OFF, TIMER2_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART0_ON, TWI_OFF);
+    //QACTIVE_POST((QActive *)&amp;AO_RgbNightLight, Q_WAKEUP_SIG, 0U);
+
+}
+
+
+void BSP_Sleep()
+{
+    Serial.println(&quot;Useless call to BSP_Sleep&quot;);
+    delay(10);
+    //LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF, SPI_OFF, USART0_ON, TWI_OFF);
+    //QACTIVE_POST((QActive *)&amp;AO_RgbNightLight, Q_WAKEUP_SIG, 0U);
+}
+
+//............................................................................
+Q_NORETURN Q_onAssert(char const Q_ROM * const module, int location) {
+    Serial.print(F(&quot;ASSERTION: &quot;));
+    Serial.print(module);
+    Serial.print(&quot; &quot;);
+    Serial.println(location, DEC);
+    for (uint32_t volatile i = 100000U; i &gt; 0U; --i) {
+    }
+    QF_INT_DISABLE(); // disable all interrupts
+    QF_RESET();  // reset the CPU
+    for (;;) {
+    }
+}
+
+void BSP_CheckMovement(){
+    if(digitalRead(A4) == HIGH){
+        QACTIVE_POST((QActive *)&amp;AO_RgbNightLight, Q_MOTION_SENSOR_SIG, 0U);
+    }else{
+        QACTIVE_POST((QActive *)&amp;AO_RgbNightLight, Q_END_MOTION_SENSOR_SIG, 0U);
+    }
+}
+
+void BSP_Led_On(){
+ // see &quot;on&quot; method in &quot;Light&quot;
+}
+
+void BSP_Led_Off(){
+ // see &quot;off&quot; method in &quot;Light&quot;
+}
+
+void BSP_ShowColor(Color color)
+{
+    static char buffer[50];
+    sprintf(buffer, &quot;R%hu/G%hu/B%hu&quot;, (uint8_t)color.RED, (uint8_t)color.GREEN , (uint8_t)color.BLUE);
+    Serial.println(buffer);
+
+    analogWrite(Pins::RED,   color.RED);
+    analogWrite(Pins::GREEN, color.GREEN);
+    analogWrite(Pins::BLUE,  color.BLUE);
+}
+
+void setup() {
+    BSP_initSetup();
+
+    timer2OverflowCounter = 0;
+
+    // initialize the QF-nano framework
+    QF_init(Q_DIM(QF_active));
+    RgbNightLight_ctor();
+    Button_ctor();
+
+  Serial.println(&quot;--- RGB Night light READY ---&quot;);
+  delay(10);
+
+}
+
+//............................................................................
+void loop() {
+    QF_run(); // run the QF-nano framework
+}</text>
+  </file>
+  <file name="bsp_native.cpp">
+   <text>/* This file has been prepared for Doxygen **************************/
+
+/*! \file bsp_uno.ino *************************************************
+*
+* \brief Arduino Board Support Package for the Arduino-UNO
+*
+* Copyright (C) 2021 W.Nijs (ALF4all)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+*
+* \author   W.Nijs.
+* \date     04/01/2021
+* \version  1.0 04/01/2021, initial revision, W.Nijs
+*
+*********************************************************************/
+/*****************************************************************//**
+* Include section
+*  Add all #includes here.
+*********************************************************************/
+#include &quot;qpn.h&quot;
+#include &quot;rgbNightLight.hpp&quot;
+#include &quot;bsp.hpp&quot;
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+/*****************************************************************//**
+* Define section
+*  Add all #defines here.
+*********************************************************************/
+
+#define DEBUG
+
+#define BUTTON          2 // Can only be pin 2 or 3 on the Uno
+
+
+//============================================================================
+
+void setup(void);
+void loop(void);
+
+int main(int argc, char**argv) {
+    setup();
+    loop();
+}
+
+/*****************************************************************//**
+* BSP_initSetup()
+*********************************************************************/
+void BSP_initSetup(void) {
+  printf(&quot;%s\n&quot;, &quot;BSP_initSetup&quot;);
+};
+
+/*****************************************************************//**
+* BSP_initTick()
+*********************************************************************/
+void BSP_initTick(void) {
+  printf(&quot;BSP_initTick\n&quot;);
+};
+
+//============================================================================
+// QF callbacks...
+void QF_onStartup(void) {
+    printf(&quot;QF_onStartup\n&quot;);
+}
+
+
+static bool movementDetected;
+//............................................................................
+void QV_onIdle(void) {   // called with interrupts DISABLED
+    // Put the CPU and peripherals to the low-power mode. You might
+    // need to customize the clock management for your application,
+    // see the datasheet for your particular AVR MCU.
+    printf(&quot;%s\n&quot;, &quot;QV_onIdle&quot;);
+    char sen[100];
+    scanf(&quot;%s&quot;, &amp;sen);
+    if(strcmp(sen, &quot;b&quot;) == 0)
+    {
+          printf(&quot;---- POST Q_BUTTON_SWITCH_SIG\n&quot;);
+          QACTIVE_POST((QActive *)&amp;AO_Button, Q_BUTTON_SWITCH_SIG, 0U);
+    }
+    if(strcmp(sen, &quot;m&quot;) == 0)
+    {
+          printf(&quot;---- toggle movement detected from BSP \n&quot;);
+          movementDetected = !movementDetected;
+          
+    }
+
+    if(strcmp(sen, &quot;q&quot;) == 0)
+    {
+        exit(0);
+    }
+    QF_tickXISR(0);
+}
+
+void BSP_CheckMovement(){
+
+}
+
+
+void BSP_Println(const char* message)
+{
+    printf(&quot;%s\n&quot;, message);
+}
+
+void BSP_Led_On(){
+    printf(&quot;Enter BSP_Led_On\n&quot;);
+}
+
+void BSP_Led_Off(){
+    printf(&quot;Enter BSP_Led_Off\n&quot;);
+}
+
+void BSP_ShowColor(Color color){
+    printf(&quot;Display color as RGB[%d,%d,%d]\n&quot;, color.RED, color.GREEN, color.BLUE);
+}
+
+void BSP_Sleep()
+{
+    printf(&quot;Sleep\n&quot;);
+
+}
+
+
+//............................................................................
+Q_NORETURN Q_onAssert(char const Q_ROM * const module, int location) {
+    printf(&quot;[%s][%d] %s\n&quot;, module, location, &quot;Q_onAssert (fatal)&quot;);
+    exit(-1);
+}
+
+void setup() {
+    // initialize the QF-nano framework
+    QF_init(Q_DIM(QF_active));
+    BSP_initSetup();
+    RgbNightLight_ctor();
+    Button_ctor();
+    movementDetected = false;
+}
+
+//............................................................................
+void loop() {
+    QF_run(); // run the QF-nano framework
+}</text>
+  </file>
+  <file name="bsp_test.cpp">
+   <text>/* This file has been prepared for Doxygen **************************/
+
+/*! \file bsp_uno.ino *************************************************
+*
+* \brief Arduino Board Support Package for the Arduino-UNO
+*
+* Copyright (C) 2021 W.Nijs (ALF4all)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+*
+* \author   W.Nijs.
+* \date     04/01/2021
+* \version  1.0 04/01/2021, initial revision, W.Nijs
+*
+*********************************************************************/
+/*****************************************************************//**
+* Include section
+*  Add all #includes here.
+*********************************************************************/
+#include &quot;qpn.h&quot;
+#include &quot;rgbNightLight.hpp&quot;
+#include &quot;bsp.hpp&quot;
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+/*****************************************************************//**
+* Define section
+*  Add all #defines here.
+*********************************************************************/
+
+#define DEBUG
+
+#define BUTTON_PIN          2 // Can only be pin 2 or 3 on the Uno
+
+
+/*****************************************************************//**
+* BSP_initSetup()
+*********************************************************************/
+void BSP_initSetup(void) {
+  printf(&quot;%s\n&quot;, &quot;BSP_initSetup&quot;);
+};
+
+/*****************************************************************//**
+* BSP_initTick()
+*********************************************************************/
+void BSP_initTick(void) {
+  printf(&quot;BSP_initTick\n&quot;);
+};
+
+
+//============================================================================
+// QF callbacks...
+void QF_onStartup(void) {
+
+    printf(&quot;QF_onStartup\n&quot;);
+    printf(&quot;\n------------- Launch tests ----------------\n&quot;);
+
+    printf(&quot;%s\n&quot;, &quot;\nShort press\n&quot;);
+    QACTIVE_POST((QActive *)&amp;AO_Button, Q_BUTTON_SWITCH_SIG, 0U);
+    QF_tickXISR(0);
+    QF_tickXISR(0);
+    QACTIVE_POST((QActive *)&amp;AO_Button, Q_BUTTON_SWITCH_SIG, 0U);
+
+    printf(&quot;%s\n&quot;, &quot;\nLong press\n&quot;);
+    RgbNightLight_ctor();
+    Button_ctor();
+    QF_tickXISR(0);
+    QACTIVE_POST((QActive *)&amp;AO_Button, Q_BUTTON_SWITCH_SIG, 0U);
+    for(uint8_t counter = 0; counter &lt; LONG_PRESS_DURATION; counter++)
+    {
+        QF_tickXISR(0);
+    }
+    QACTIVE_POST((QActive *)&amp;AO_Button, Q_BUTTON_SWITCH_SIG, 0U);
+
+    exit(0);
+}
+
+//............................................................................
+void QV_onIdle(void) {   // called with interrupts DISABLED
+    // Put the CPU and peripherals to the low-power mode. You might
+    // need to customize the clock management for your application,
+    // see the datasheet for your particular AVR MCU.
+
+}
+//............................................................................
+Q_NORETURN Q_onAssert(char const Q_ROM * const module, int location) {
+    printf(&quot;[%s][%d] %s\n&quot;, module, location, &quot;Q_onAssert (fatal)&quot;);
+    exit(-1);
+}
+
+void BSP_ShowColor(Color color){
+      printf(&quot;%s :%u\n&quot;, &quot;BSP_ShowColor&quot;, color);
+
+}</text>
+  </file>
+ </directory>
+ <directory name="../include"/>
+</model>
