@@ -237,6 +237,7 @@ void loop() {
 #endif
 
   if (buttonSwitched) {
+    buttonSwitched = false;
     bool buttonIsReleased = (digitalRead(Pins::BUTTON) == HIGH);
     if (buttonIsReleased) {
       detachInterrupt(digitalPinToInterrupt(Pins::BUTTON));
