@@ -295,7 +295,6 @@ void loop() {
     if (!buttonSwitched) {
       notifyTooMuchLight();
     }
-    buttonSwitched = false;
     DeepSleep();
   }
 }
