@@ -9,7 +9,7 @@ If the ambiant luminosity is low, the lamp remain on selected color until no mor
 The repository contains:
 
 - An Arduino sketch to drive the lamp
-- The [Kicad](http://kicad-pcb.org/) schema
+- The [Kicad](http://kicad.org/) schema
 - A [VeroRoute](https://sourceforge.net/projects/veroroute/) implantation layout
 
 # Software
