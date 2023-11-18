@@ -20,7 +20,6 @@ bool movementDetected = false;
 uint8_t rgbOrder = 0;
 static const uint8_t SHUTDOWN = 5;
 
-#define DEBUG
 #if defined(DEBUG)
 #define DEBUG(message) \
   Serial.print(message); \
