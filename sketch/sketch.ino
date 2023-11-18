@@ -11,7 +11,7 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#define AMBIENT_LIGHT_TRESHOLD 30
+#define AMBIENT_LIGHT_TRESHOLD 35
 
 #define IS_MOVEMENT_DETECTED() HIGH == (digitalRead(A4))
 
