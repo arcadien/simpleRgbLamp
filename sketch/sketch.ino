@@ -11,7 +11,7 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#define AMBIENT_LIGHT_TRESHOLD 35
+#define AMBIANT_LIGHT_TRESHOLD 35
 
 #define IS_MOVEMENT_DETECTED() HIGH == (digitalRead(A4))
 
@@ -258,7 +258,7 @@ void loop() {
     }
   }
 
-  if (monitoring.luminosity < AMBIENT_LIGHT_TRESHOLD) {
+  if (monitoring.luminosity < AMBIANT_LIGHT_TRESHOLD) {
 
     if (movementSensorStateHasChanged == true) {
       DEBUG_LN("Movement event!");
