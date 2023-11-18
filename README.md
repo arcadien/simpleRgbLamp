@@ -1,12 +1,10 @@
 # Power saving multicolor light
 
-A multi-mode RGB lamp able to detect movement around.
+A battery-powered RGB lamp able to detect movement and ambiant light to adapt its behavior.
 
-_The behaviour is simple : Once it starts, the first color is red. A push on the button will cycle the color order. The colors are: red, green, blue, pink, orange and deep sleep.
-When in deep sleep, the power consumption is minimized to some µA (the Pro mini is powered directly on the VCC pin, so there is no DC regulator consumption).
-When user push the button again, the firmware wakes up and color cycle stars with red again._
-
-NOTE: After 6 hours, the lamp will automatically go to deep sleep, until user pushes the button.
+_The behaviour is simple : Once it starts, the first color is red. A push on the button will cycle the color order. The colors are: red, green, blue, pink, orange. After orange, a button press triggers deep sleep.
+When in deep sleep, lamp can be wake up by button press or movement detection. If ambiant luminosity is too high, the lamp emits a quick blue blink and shut down. 
+If the ambiant luminosity is low, the lamp remain on selected color until no more movement is detected long enough._
 
 The repository contains:
 
