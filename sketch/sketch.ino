@@ -186,22 +186,22 @@ struct Monitoring {
   uint16_t batteryVoltage;
 };
 
-static void blinkTwoTimes() {
+static void notifyTooMuchLight() {
 
-  analogWrite(Pins::RED, 100);
+  analogWrite(Pins::RED, 0);
   analogWrite(Pins::GREEN, 0);
-  analogWrite(Pins::BLUE, 0);
-  _delay_ms(500);
+  analogWrite(Pins::BLUE, 100);
+  _delay_ms(200);
 
   analogWrite(Pins::RED, 0);
   analogWrite(Pins::GREEN, 0);
   analogWrite(Pins::BLUE, 0);
-  _delay_ms(500);
+  _delay_ms(200);
 
-  analogWrite(Pins::RED, 100);
+  analogWrite(Pins::RED, 0);
   analogWrite(Pins::GREEN, 0);
-  analogWrite(Pins::BLUE, 0);
-  _delay_ms(500);
+  analogWrite(Pins::BLUE, 100);
+  _delay_ms(200);
 
   analogWrite(Pins::RED, 0);
   analogWrite(Pins::GREEN, 0);
@@ -293,7 +293,7 @@ void loop() {
     delay(10);
 #endif
     if (!buttonSwitched) {
-      blinkTwoTimes();
+      notifyTooMuchLight();
     }
     buttonSwitched = false;
     DeepSleep();
