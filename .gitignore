@@ -4,3 +4,8 @@
 .vscode/launch.json
 .vscode/ipch
 src/
+.simpleRgbLamp
+.vscode/ 
+Makefile 
+*backups* 
+model/.rgbNightLight
