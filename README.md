@@ -20,7 +20,7 @@ The repository contains:
 | ---------------------- | --------------------------------------------------------------------------------------------------------- |
 | [HLR1](../../issues/1) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)               |
 | [HLR2](../../issues/2) | PSML detects ambient light and does not power up if luminosity is more than TBD lux                       |
-| [HLR3](../../issues/3) | PSML wakes up when it detects movement around, and go back to deep sleeps after 5 minutes of non-movement |
+| [HLR3](../../issues/3) | PSML wakes up when it detects movement around, and go back to deep sleeps when movement detection ends    |
 | [HLR4](../../issues/4) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)               |
 | [HLR5](../../issues/5) | PSML transmit its remaning battery level wirelessly, each 15 minutes                                      |
 | [HLR6](../../issues/6) | PSML transmit light intensity wirelessly, each 15 minutes                                                 |
@@ -71,11 +71,11 @@ NOTE: _data_ is a value which is exchanged between components
 | HWR1       | photoresistor shall be wired on `PC0 (A0)`, configured as analog input, throught a voltage divider using a 10k resistor |
 | HWR2       | Presence sensor signal shall be wired on `PC4` (Arduino Pro mini A4)                                                    |
 | HWR3       | Battery (VBatt) shall be wired on Presence sensor signal is wired on `PC1` (Arduino Pro mini A1)                        |
-| HWR4       | Battery shall be wired on a DC/DC converter so that Vcc is always 5v                                                    |
+| HWR4       | Battery shall be wired on a DC/DC step up so that Vcc is always 5v                                                    |
 | HWR5       | 433Mhz emmitter shall be wired on `PB0 (8)` pin                                                                         |
-| HWR6       | The three leds outputs are RED `PB1` (Arduino Pro mini 9), Green `PD1` (Arduino Pro mini 3), Blue ` PD6`  (Arduino Pro mini 6)                                            |
+| HWR6       | The three leds outputs are RED `PB1` (Arduino Pro mini '9'), Green `PD1` (Arduino Pro mini '3'), Blue ` PD6`  (Arduino Pro mini '6')                                            |
 | HWR7       | Leds shall be driver by transistor/MOSFET rather that pins to avoid too high power draw                                 |
-| HWR8       | Push button shall be wired on `PD2` (Arduino Pro mini 2)                                                                |
+| HWR8       | Push button shall be wired on `PD2` (Arduino Pro mini '2')                                                                |
 
 # Non functional requirements
 
@@ -86,6 +86,8 @@ NOTE: _data_ is a value which is exchanged between components
 
 # Constants
 
-| Name                   | Value | Description                                     |
-| ---------------------- | ----- | ----------------------------------------------- |
-| MAX_LIGHT_FOR_POWER_ON | TBD   | PSML only wakes up under that light measurement |
+| Name                   | Value | Description                                         |
+| ---------------------- | ----- | ----------------------------------------------------|
+| AMBIANT_LIGHT_TRESHOLD | 122mV | PSML only wakes up under that light ADC measurement |
+| LOW_POWER_MV           | 2500mV  | PSML blinks and does not start normally under this battery voltage|
+
