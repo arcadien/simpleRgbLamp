@@ -63,7 +63,7 @@ NOTE: _data_ is a value which is exchanged between components
 - Light sensor is a simple photoresistor (LDR)
 - Presence sensor is a [HC SR501](https://www.makerguides.com/hc-sr501-arduino-tutorial/)
 - Push button is available from outside enclosing device
-- Rogers itself will be implemented on a [Arduino Pro Mini](https://docs.arduino.cc/retired/boards/arduino-pro-mini)
+- PSML itself will be implemented on a [Arduino Pro Mini](https://docs.arduino.cc/retired/boards/arduino-pro-mini)
 
 | Identifier | Description                                                                                                             |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
