@@ -67,22 +67,22 @@ NOTE: _data_ is a value which is exchanged between components
 
 | Identifier | Description                                                                                                             |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| HWR0       | Unless specified, all pins shall be set as 'input/pull up' for lower power consumption                                  |
-| HWR1       | photoresistor shall be wired on `PC0 (A0)`, configured as analog input, throught a voltage divider using a 10k resistor |
-| HWR2       | Presence sensor signal shall be wired on `PC4` (Arduino Pro mini A4)                                                    |
-| HWR3       | Battery (VBatt) shall be wired on Presence sensor signal is wired on `PC1` (Arduino Pro mini A1)                        |
-| HWR4       | Battery shall be wired on a DC/DC step up so that Vcc is always 5v                                                    |
+| HWR0       | ~Unless specified, all pins shall be set as 'input/pull up' for lower power consumption~                                  |
+| HWR1       | ~photoresistor shall be wired on `PC0 (A0)`, configured as analog input, throught a voltage divider using a 10k resistor~ |
+| HWR2       | ~Presence sensor signal shall be wired on `PC4` (Arduino Pro mini A4)~                                                    |
+| HWR3       | ~Battery (VBatt) shall be wired on Presence sensor signal is wired on `PC1` (Arduino Pro mini A1)~                        |
+| HWR4       | ~Battery shall be wired on a DC/DC step up so that Vcc is always 5v~                                                    |
 | HWR5       | 433Mhz emmitter shall be wired on `PB0 (8)` pin                                                                         |
-| HWR6       | The three leds outputs are RED `PB1` (Arduino Pro mini '9'), Green `PD1` (Arduino Pro mini '3'), Blue ` PD6`  (Arduino Pro mini '6')                                            |
-| HWR7       | Leds shall be driver by transistor/MOSFET rather that pins to avoid too high power draw                                 |
-| HWR8       | Push button shall be wired on `PD2` (Arduino Pro mini '2')                                                                |
+| HWR6       | ~The three leds outputs are RED `PB1` (Arduino Pro mini '9'), Green `PD1` (Arduino Pro mini '3'), Blue ` PD6`  (Arduino Pro mini '6')~                                            |
+| HWR7       | ~Leds shall be driver by transistor/MOSFET rather that pins to avoid too high power draw~                                 |
+| HWR8       | ~Push button shall be wired on `PD2` (Arduino Pro mini '2')~                                                      |
 
 # Non functional requirements
 
 | Identifier | Description                                                               |
 | ---------- | ------------------------------------------------------------------------- |
-| NFR1       | PSML runs on battery and can be charged using micro-USB socket            |
-| NFR2       | PSML does not start if battery voltage is too low to avoid deep discharge |
+| NFR1       | ~PSML runs on battery and can be charged using micro-USB socket~            |
+| NFR2       | ~PSML does not start if battery voltage is too low to avoid deep discharge~ |
 
 # Constants
 
