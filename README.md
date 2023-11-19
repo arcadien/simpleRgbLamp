@@ -60,7 +60,7 @@ NOTE: _data_ is a value which is exchanged between components
 ```
 
 - Battery is a 18650
-- Light sensor is a simple photoresistor (LDR)
+- Light sensor is a simple photoresistor GL5528 (1MΩ)
 - Presence sensor is a [HC SR501](https://www.makerguides.com/hc-sr501-arduino-tutorial/)
 - Push button is available from outside enclosing device
 - PSML itself will be implemented on a [Arduino Pro Mini](https://docs.arduino.cc/retired/boards/arduino-pro-mini)
