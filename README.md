@@ -51,8 +51,8 @@ NOTE: _data_ is a value which is exchanged between components
  Battery ----------->|        |
                      |        |
  Presence Sensor --->|        |
-                     |        |--> RGB LED
- Light Sensor ------>|  PSML  |
+                     |        |--> RGB LEDs
+ Luminosity Sensor ->|  PSML  |
                      |        |--> 433Mhz transmitter
  Push button  ------>|        |
                      |--------|
