@@ -18,10 +18,10 @@ The repository contains:
 
 | Identifier             | Description                                                                                               |
 | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| [HLR1](../../issues/1) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)               |
-| [HLR2](../../issues/2) | PSML detects ambient light and does not power up if luminosity is more than TBD lux                       |
-| [HLR3](../../issues/3) | PSML wakes up when it detects movement around, and go back to deep sleeps when movement detection ends    |
-| [HLR4](../../issues/4) | PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)               |
+| [HLR1](../../issues/1) | ~PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)~             |
+| [HLR2](../../issues/2) | ~PSML detects ambient light and does not power up if luminosity is more than AMBIANT_LIGHT_TRESHOLD mv~   |
+| [HLR3](../../issues/3) | ~PSML wakes up when it detects movement around, and go back to deep sleeps when movement detection ends~  |
+| [HLR4](../../issues/4) | ~PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)~             |
 | [HLR5](../../issues/5) | PSML transmit its remaning battery level wirelessly, each 15 minutes                                      |
 | [HLR6](../../issues/6) | PSML transmit light intensity wirelessly, each 15 minutes                                                 |
 | [HLR7](../../issues/7) | Long press (2 seconds) on push button toggles permanent light mode                                        |
