@@ -47,7 +47,7 @@ Uncomment `#define SERIAL_OUT` in `sketch.ino` to log state transitions.
 | [HLR2](../../issues/3) | ~PSML detects ambient light and does not power up if luminosity is more than AMBIANT_LIGHT_TRESHOLD (ADC counts)~ |
 | [HLR3](../../issues/4) | ~PSML wakes up when it detects movement around, and go back to deep sleeps when movement detection ends~  |
 | [HLR4](../../issues/5) | ~Duplicate of HLR1~                                                                                       |
-| [HLR5](../../issues/6) | PSML transmit its remaning battery level wirelessly, each 15 minutes (_partial: sent on each wake-up from deep sleep, no periodic wake-up yet_) |
+| [HLR5](../../issues/6) | ~PSML transmits its remaining battery level wirelessly on each wake-up from deep sleep~                  |
 | [HLR6](../../issues/7) | PSML transmit light intensity wirelessly, each 15 minutes (_not implemented_)                             |
 | HLR7                   | Long press (2 seconds) on push button toggles permanent light mode (_not implemented, no issue yet_)      |
 
