@@ -2,15 +2,40 @@
 
 A battery-powered RGB lamp able to detect movement and ambiant light to adapt its behavior.
 
-_The behaviour is simple : Once it starts, the first color is red. A push on the button will cycle the color order. The colors are: red, green, blue, pink, orange. After orange, a button press triggers deep sleep.
-When in deep sleep, lamp can be wake up by button press or movement detection. If ambiant luminosity is too high, the lamp emits a quick blue blink and shut down. 
-If the ambiant luminosity is low, the lamp remain on selected color until no more movement is detected long enough._
+_The behaviour is simple : Once it starts, the first color is red. A click on the button (on release) cycles the colors: red, green, blue, pink, orange. After orange, a click turns the lamp off (deep sleep).
+When in deep sleep, lamp can be woken up by button press or movement detection. If ambiant luminosity is too high, the lamp emits a quick blue blink and shuts down. If the battery is too low, it blinks red and shuts down.
+If the ambiant luminosity is low, the lamp remains on the selected color as long as movement is detected. On each wake-up from deep sleep, the battery voltage is sent over 433Mhz._
 
 The repository contains:
 
-- An Arduino sketch to drive the lamp
-- The [Kicad](http://kicad.org/) schema
+- A PlatformIO firmware for the ATtiny84A (`sketch/`)
+- The [Kicad](http://kicad.org/) schema (`kicad/`)
 - A [VeroRoute](https://sourceforge.net/projects/veroroute/) implantation layout (_outdated: predates the current schematic_)
+
+# Firmware
+
+Each wake-up, the main loop measures battery and light, then picks one state by priority:
+
+| Priority | State         | Condition                                  | Action                                                   |
+| -------- | ------------- | ------------------------------------------ | -------------------------------------------------------- |
+| 1        | `LowBattery`  | battery ≤ `LOW_POWER_MV`                   | blink red, deep sleep                                    |
+| 2        | `ColorSelect` | button released                            | show next color; after orange, blackout and deep sleep   |
+| 3        | `TooBright`   | light ≥ `AMBIANT_LIGHT_TRESHOLD`           | blink blue, deep sleep                                   |
+| 4        | `NightMotion` | dark and PIR high                          | show color, idle sleep (PWM keeps running)               |
+| 5        | `NightIdle`   | dark and PIR low                           | deep sleep                                               |
+
+While in `NightMotion` the LDR is not read: the lamp's own light would trip `TooBright` and switch it off by itself.
+The PIR level is read directly; its interrupt only wakes the MCU.
+
+Build and flash (from `sketch/`, USBasp by default, see the ISP warning below):
+
+```
+pio run                 # build
+pio run -t fuses        # once: internal 8 MHz, BOD 2.7 V
+pio run -t upload
+```
+
+Uncomment `#define SERIAL_OUT` in `sketch.ino` to log state transitions.
 
 # Software
 
@@ -18,13 +43,13 @@ The repository contains:
 
 | Identifier             | Description                                                                                               |
 | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| [HLR1](../../issues/1) | ~PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)~             |
-| [HLR2](../../issues/2) | ~PSML detects ambient light and does not power up if luminosity is more than AMBIANT_LIGHT_TRESHOLD mv~   |
-| [HLR3](../../issues/3) | ~PSML wakes up when it detects movement around, and go back to deep sleeps when movement detection ends~  |
-| [HLR4](../../issues/4) | ~PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)~             |
-| [HLR5](../../issues/5) | PSML transmit its remaning battery level wirelessly, each 15 minutes                                      |
-| [HLR6](../../issues/6) | PSML transmit light intensity wirelessly, each 15 minutes                                                 |
-| [HLR7](../../issues/7) | Long press (2 seconds) on push button toggles permanent light mode                                        |
+| [HLR1](../../issues/2) | ~PSML button allow to change the color in a set of 5 colors (RED, GREEN, BLUE, ORANGE, PINK)~             |
+| [HLR2](../../issues/3) | ~PSML detects ambient light and does not power up if luminosity is more than AMBIANT_LIGHT_TRESHOLD (ADC counts)~ |
+| [HLR3](../../issues/4) | ~PSML wakes up when it detects movement around, and go back to deep sleeps when movement detection ends~  |
+| [HLR4](../../issues/5) | ~Duplicate of HLR1~                                                                                       |
+| [HLR5](../../issues/6) | ~PSML transmits its remaining battery level wirelessly on each wake-up from deep sleep~                  |
+| [HLR6](../../issues/7) | PSML transmit light intensity wirelessly, each 15 minutes (_won't do_)                                    |
+| HLR7                   | Long press (2 seconds) on push button toggles permanent light mode (_won't do_)                          |
 
 ## Architecture
 
