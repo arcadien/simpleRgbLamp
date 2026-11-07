@@ -64,7 +64,7 @@ NOTE: _data_ is a value which is exchanged between components
 - Light sensor is a simple photoresistor GL5528 (10–20 kΩ at 10 lux, ≥1 MΩ dark), powered from `PA0` only while measuring, with a 10k pull-down to GND
 - Presence sensor is an AM312 mini PIR (2.7–12 V)
 - 433Mhz transmitter is a FS1000A module
-- LEDs are switched by IRLZ44N logic-level MOSFETs (common anode strip)
+- LEDs are switched low-side by BC337 NPN transistors, 1k base resistors (≤ ~45 mA per color at 3.0 V; common anode LED, total ≤ 0.1 A)
 - Push button is available from outside enclosing device
 - PSML itself is an [ATtiny84A](https://www.microchip.com/en-us/product/ATtiny84A) on its internal 8 MHz oscillator, programmed through a 2×3 ISP header
   - ⚠️ The ISP header VCC is the battery rail: never let the programmer power the target (no 5 V jumper on a USBasp). Program with the battery in place and a programmer set to 3.3 V logic, or with the battery removed and 3.3 V supplied by the programmer
