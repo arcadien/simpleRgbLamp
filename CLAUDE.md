@@ -1,6 +1,6 @@
 # simpleRgbLamp
 
-Battery-powered RGB lamp on an Arduino Pro Mini (5 V / 16 MHz). See README.md.
+Battery-powered RGB lamp on an ATtiny84A (internal 8 MHz, powered directly from the 18650). See README.md.
 
 - `sketch/` — PlatformIO firmware. **The firmware is the source of truth for pin assignments**; schematic and README follow it.
 - `kicad/` — KiCad schematic (project symbols in `kicad/LedLamp.kicad_sym`).
