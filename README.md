@@ -49,7 +49,7 @@ Uncomment `#define SERIAL_OUT` in `sketch.ino` to log state transitions.
 | [HLR4](../../issues/5) | ~Duplicate of HLR1~                                                                                       |
 | [HLR5](../../issues/6) | ~PSML transmits its remaining battery level wirelessly on each wake-up from deep sleep~                  |
 | [HLR6](../../issues/7) | PSML transmit light intensity wirelessly, each 15 minutes (_won't do_)                                    |
-| HLR7                   | Long press (2 seconds) on push button toggles permanent light mode (_not implemented, no issue yet_)      |
+| HLR7                   | Long press (2 seconds) on push button toggles permanent light mode (_won't do_)                          |
 
 ## Architecture
 
