@@ -1,3 +1,4 @@
 (sym_lib_table
-  (lib (name LedLamp-rescue)(type Legacy)(uri ${KIPRJMOD}/LedLamp-rescue.lib)(options "")(descr ""))
+  (version 7)
+  (lib (name "LedLamp")(type "KiCad")(uri "${KIPRJMOD}/LedLamp.kicad_sym")(options "")(descr "simpleRgbLamp modules"))
 )
