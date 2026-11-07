@@ -60,7 +60,7 @@ NOTE: _data_ is a value which is exchanged between components
 ```
 
 - Battery is a 18650, charged through a TP4056 module (micro-USB, with protection). The MCU and sensors run directly on the battery (`VBAT`, 3.0–4.2 V)
-- A MT3608 step-up module provides 5 V for the LEDs only; an AO3401A P-MOSFET cuts its input when the LEDs are off
+- A MT3608 step-up module provides 5 V for the LEDs only; a BC327 PNP (base via 220 Ω from `PB0`, 10k base-emitter) cuts its input when the LEDs are off
 - Light sensor is a simple photoresistor GL5528 (10–20 kΩ at 10 lux, ≥1 MΩ dark), powered from `PA0` only while measuring, with a 10k pull-down to GND
 - Presence sensor is an AM312 mini PIR (2.7–12 V)
 - 433Mhz transmitter is a FS1000A module

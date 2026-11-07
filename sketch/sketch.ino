@@ -51,7 +51,7 @@ struct Pins {
   static const uint8_t PIR = PIN_PA3;        // PCINT3
   static const uint8_t LUMINOSITY = A1;      // ADC channel 1 = PA1
   static const uint8_t LDR_POWER = PIN_PA0;  // powers the LDR divider
-  static const uint8_t STEPUP_OFF = PIN_PB0; // P-MOSFET gate, LOW = LEDs powered
+  static const uint8_t STEPUP_OFF = PIN_PB0; // BC327 PNP base (via 220R), LOW = LEDs powered
   static const uint8_t RED = PIN_PA7;        // OC0B
   static const uint8_t GREEN = PIN_PA6;      // OC1A
   static const uint8_t BLUE = PIN_PA5;       // OC1B
