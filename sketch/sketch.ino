@@ -44,6 +44,8 @@ enum class LampState : uint8_t {
   NightIdle,   // dark and PIR low: power down
 };
 
+LampState lampState = LampState::NightIdle;
+
 //#define SERIAL_OUT
 
 #if defined(SERIAL_OUT)
@@ -222,13 +224,17 @@ static void notifyLowPower() {
   setRgb(0, 0, 0);
 }
 
-static struct Monitoring performMonitoring() {
+// Lit lamp would blind its own LDR: NightMotion skips it and stays dark
+static struct Monitoring performMonitoring(bool readLuminosity) {
   Monitoring monitoring;
-  digitalWrite(Pins::LDR_POWER, HIGH);
-  monitoring.luminosity = analogRead(Pins::LUMINOSITY);
-  monitoring.luminosity += analogRead(Pins::LUMINOSITY);
-  monitoring.luminosity /= 2;
-  digitalWrite(Pins::LDR_POWER, LOW);
+  monitoring.luminosity = 0;
+  if (readLuminosity) {
+    digitalWrite(Pins::LDR_POWER, HIGH);
+    monitoring.luminosity = analogRead(Pins::LUMINOSITY);
+    monitoring.luminosity += analogRead(Pins::LUMINOSITY);
+    monitoring.luminosity /= 2;
+    digitalWrite(Pins::LDR_POWER, LOW);
+  }
 
   // VCC is the battery: measure the 1.1 V bandgap against VCC
   analogRead(ADC_BANDGAP);
@@ -291,17 +297,14 @@ static const char *const STATE_NAMES[] = {"LowBattery", "ColorSelect",
 #endif
 
 // Logs transitions only: NightMotion loops on every millis() tick
-static void logState(LampState state) {
+static void setState(LampState state) {
 #if defined(SERIAL_OUT)
-  static LampState previous = LampState::NightIdle;
-  if (state != previous) {
+  if (state != lampState) {
     SERIAL_OUTPUT("State: ");
     SERIAL_OUTPUT_LN(STATE_NAMES[(uint8_t)state]);
-    previous = state;
   }
-#else
-  (void)state;
 #endif
+  lampState = state;
 }
 
 // Returns true when the blackout slot is reached: manual shutdown
@@ -320,7 +323,8 @@ static bool selectNextColor() {
 bool sendPowerAtNextCycle = false;
 void loop() {
 
-  Monitoring monitoring = performMonitoring();
+  Monitoring monitoring =
+      performMonitoring(lampState != LampState::NightMotion);
 
   if (sendPowerAtNextCycle) {
     x10Meter.RFXmeter(X10_IDENTIFIER, 0x00,
@@ -332,10 +336,9 @@ void loop() {
   bool buttonReleased = buttonSwitched && digitalRead(Pins::BUTTON) == HIGH;
   buttonSwitched = false;
 
-  LampState state = evaluate(monitoring, buttonReleased, IS_MOVEMENT_DETECTED());
-  logState(state);
+  setState(evaluate(monitoring, buttonReleased, IS_MOVEMENT_DETECTED()));
 
-  switch (state) {
+  switch (lampState) {
   case LampState::LowBattery:
     notifyLowPower();
     break;
