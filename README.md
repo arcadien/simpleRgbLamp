@@ -10,7 +10,7 @@ The repository contains:
 
 - An Arduino sketch to drive the lamp
 - The [Kicad](http://kicad.org/) schema
-- A [VeroRoute](https://sourceforge.net/projects/veroroute/) implantation layout
+- A [VeroRoute](https://sourceforge.net/projects/veroroute/) implantation layout (_outdated: predates the current schematic_)
 
 # Software
 
@@ -59,9 +59,12 @@ NOTE: _data_ is a value which is exchanged between components
 
 ```
 
-- Battery is a 18650
-- Light sensor is a simple photoresistor GL5528 (1MΩ)
+- Battery is a 18650, charged through a TP4056 module (micro-USB, with protection)
+- A MT3608 step-up module provides the 5 V rail (`Vcc`)
+- Light sensor is a simple photoresistor GL5528 (10–20 kΩ at 10 lux, ≥1 MΩ dark), between Vcc and A0, with a 10k pull-down to GND
 - Presence sensor is a [HC SR501](https://www.makerguides.com/hc-sr501-arduino-tutorial/)
+- 433Mhz transmitter is a FS1000A module
+- LEDs are switched by IRFZ44N MOSFETs (common anode strip)
 - Push button is available from outside enclosing device
 - PSML itself will be implemented on a [Arduino Pro Mini](https://docs.arduino.cc/retired/boards/arduino-pro-mini)
 
@@ -70,10 +73,10 @@ NOTE: _data_ is a value which is exchanged between components
 | HWR0       | ~Unless specified, all pins shall be set as 'input/pull up' for lower power consumption~                                  |
 | HWR1       | ~photoresistor shall be wired on `PC0 (A0)`, configured as analog input, throught a voltage divider using a 10k resistor~ |
 | HWR2       | ~Presence sensor signal shall be wired on `PC4` (Arduino Pro mini A4)~                                                    |
-| HWR3       | ~Battery (VBatt) shall be wired on Presence sensor signal is wired on `PC1` (Arduino Pro mini A1)~                        |
+| HWR3       | ~Battery (VBAT) shall be wired directly on `PC1` (Arduino Pro mini A1), analog input~                        |
 | HWR4       | ~Battery shall be wired on a DC/DC step up so that Vcc is always 5v~                                                    |
-| HWR5       | 433Mhz emmitter shall be wired on `PB0 (8)` pin                                                                         |
-| HWR6       | ~The three leds outputs are RED `PB1` (Arduino Pro mini '9'), Green `PD1` (Arduino Pro mini '3'), Blue ` PD6`  (Arduino Pro mini '6')~                                            |
+| HWR5       | 433Mhz emmitter shall be wired on `PB2` (Arduino Pro mini '10')                                                                         |
+| HWR6       | ~The three leds outputs are RED `PB1` (Arduino Pro mini '9'), Green `PD3` (Arduino Pro mini '3'), Blue ` PD6`  (Arduino Pro mini '6')~                                            |
 | HWR7       | ~Leds shall be driver by transistor/MOSFET rather that pins to avoid too high power draw~                                 |
 | HWR8       | ~Push button shall be wired on `PD2` (Arduino Pro mini '2')~                                                      |
 
@@ -88,6 +91,6 @@ NOTE: _data_ is a value which is exchanged between components
 
 | Name                   | Value | Description                                         |
 | ---------------------- | ----- | ----------------------------------------------------|
-| AMBIANT_LIGHT_TRESHOLD | 122mV | PSML only wakes up under that light ADC measurement |
+| AMBIANT_LIGHT_TRESHOLD | 25 (ADC counts, ≈122 mV at Vcc 5 V) | PSML only wakes up under that light ADC measurement |
 | LOW_POWER_MV           | 2500mV  | PSML blinks and does not start normally under this battery voltage|
 
