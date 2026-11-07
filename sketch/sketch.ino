@@ -27,9 +27,24 @@
 
 x10rf x10Meter(RADIO_PIN, X10_REPEAT_COUNT);
 
-bool movementDetected = false;
 uint8_t rgbOrder = 0;
 static const uint8_t SHUTDOWN = 5;
+
+struct Monitoring {
+  uint16_t luminosity;
+  uint16_t batteryVoltage;
+};
+
+// What the lamp is doing for this wake-up, by priority
+enum class LampState : uint8_t {
+  LowBattery,  // battery under LOW_POWER_MV: blink red, power down
+  ColorSelect, // button released: show the next color, blackout = shutdown
+  TooBright,   // daylight: blink blue, power down
+  NightMotion, // dark and PIR high: show the color, idle sleep
+  NightIdle,   // dark and PIR low: power down
+};
+
+LampState lampState = LampState::NightIdle;
 
 //#define SERIAL_OUT
 
@@ -103,9 +118,7 @@ void ApplyColor() {
   }
 }
 
-volatile bool buttonPressed;
 volatile bool buttonSwitched;
-volatile bool movementSensorStateHasChanged;
 
 // Idle keeps the PWM timers running; any interrupt (incl. millis) wakes up
 void IdleSleep() {
@@ -134,7 +147,8 @@ void DeepSleep() {
   ADCSRA = adcsra;
 }
 
-ISR(PCINT0_vect) { movementSensorStateHasChanged = true; }
+// PIR edge only wakes the MCU up; loop() reads the PIR level itself
+EMPTY_INTERRUPT(PCINT0_vect);
 
 // Pin change (not INT0 edge): only it can wake the ATtiny from power-down
 ISR(PCINT1_vect) { buttonSwitched = true; }
@@ -169,7 +183,6 @@ void setup() {
   pinMode(Pins::PIR, INPUT);
   sbi(GIMSK, PCIE0);
   sbi(PCMSK0, PCINT3);
-  movementSensorStateHasChanged = false;
 
   rgbOrder = 0;
   ApplyColor();
@@ -182,11 +195,6 @@ void incrementRgbOrder() {
     rgbOrder = 0;
   }
 }
-
-struct Monitoring {
-  uint16_t luminosity;
-  uint16_t batteryVoltage;
-};
 
 static void notifyTooMuchLight() {
 
@@ -216,13 +224,17 @@ static void notifyLowPower() {
   setRgb(0, 0, 0);
 }
 
-static struct Monitoring performMonitoring() {
+// Lit lamp would blind its own LDR: NightMotion skips it and stays dark
+static struct Monitoring performMonitoring(bool readLuminosity) {
   Monitoring monitoring;
-  digitalWrite(Pins::LDR_POWER, HIGH);
-  monitoring.luminosity = analogRead(Pins::LUMINOSITY);
-  monitoring.luminosity += analogRead(Pins::LUMINOSITY);
-  monitoring.luminosity /= 2;
-  digitalWrite(Pins::LDR_POWER, LOW);
+  monitoring.luminosity = 0;
+  if (readLuminosity) {
+    digitalWrite(Pins::LDR_POWER, HIGH);
+    monitoring.luminosity = analogRead(Pins::LUMINOSITY);
+    monitoring.luminosity += analogRead(Pins::LUMINOSITY);
+    monitoring.luminosity /= 2;
+    digitalWrite(Pins::LDR_POWER, LOW);
+  }
 
   // VCC is the battery: measure the 1.1 V bandgap against VCC
   analogRead(ADC_BANDGAP);
@@ -241,7 +253,7 @@ static struct Monitoring performMonitoring() {
   SERIAL_OUTPUT(" mV;");
   SERIAL_OUTPUT(monitoring.luminosity);
   SERIAL_OUTPUT(" ADC;");
-  SERIAL_OUTPUT_LN(movementDetected ? "mvt" : "nomvt");
+  SERIAL_OUTPUT_LN(IS_MOVEMENT_DETECTED() ? "mvt" : "nomvt");
   delay(10);
 #endif
 
@@ -267,10 +279,52 @@ static uint16_t dec16ToHex(uint16_t input) {
   return result;
 }
 
+static LampState evaluate(const Monitoring &monitoring, bool buttonReleased,
+                          bool movementDetected) {
+  if (monitoring.batteryVoltage <= LOW_POWER_MV)
+    return LampState::LowBattery;
+  if (buttonReleased)
+    return LampState::ColorSelect;
+  if (monitoring.luminosity >= AMBIANT_LIGHT_TRESHOLD)
+    return LampState::TooBright;
+  return movementDetected ? LampState::NightMotion : LampState::NightIdle;
+}
+
+#if defined(SERIAL_OUT)
+static const char *const STATE_NAMES[] = {"LowBattery", "ColorSelect",
+                                          "TooBright", "NightMotion",
+                                          "NightIdle"};
+#endif
+
+// Logs transitions only: NightMotion loops on every millis() tick
+static void setState(LampState state) {
+#if defined(SERIAL_OUT)
+  if (state != lampState) {
+    SERIAL_OUTPUT("State: ");
+    SERIAL_OUTPUT_LN(STATE_NAMES[(uint8_t)state]);
+  }
+#endif
+  lampState = state;
+}
+
+// Returns true when the blackout slot is reached: manual shutdown
+static bool selectNextColor() {
+  cbi(PCMSK1, PCINT10); // ignore button bounces while the new color shows
+  incrementRgbOrder();
+  ApplyColor();
+  _delay_ms(500);
+  sbi(PCMSK1, PCINT10);
+  if (rgbOrder != SHUTDOWN)
+    return false;
+  rgbOrder = 0;
+  return true;
+}
+
 bool sendPowerAtNextCycle = false;
 void loop() {
 
-  Monitoring monitoring = performMonitoring();
+  Monitoring monitoring =
+      performMonitoring(lampState != LampState::NightMotion);
 
   if (sendPowerAtNextCycle) {
     x10Meter.RFXmeter(X10_IDENTIFIER, 0x00,
@@ -278,75 +332,33 @@ void loop() {
     sendPowerAtNextCycle = false;
   }
 
-  bool doDeepSleep = false;
-  bool doSleep = false;
+  // A press only arms the button; the release is the click
+  bool buttonReleased = buttonSwitched && digitalRead(Pins::BUTTON) == HIGH;
+  buttonSwitched = false;
 
-  if (monitoring.batteryVoltage > LOW_POWER_MV) {
+  setState(evaluate(monitoring, buttonReleased, IS_MOVEMENT_DETECTED()));
 
-    if (buttonSwitched) {
-      buttonSwitched = false;
-      bool buttonIsReleased = (digitalRead(Pins::BUTTON) == HIGH);
-      if (buttonIsReleased) {
-        cbi(PCMSK1, PCINT10);
-        SERIAL_OUTPUT_LN("Button clicked, color bump");
-        incrementRgbOrder();
-        ApplyColor();
-        _delay_ms(500);
-        sbi(PCMSK1, PCINT10);
-        if (rgbOrder == SHUTDOWN) {
-          rgbOrder = 0;
-          SERIAL_OUTPUT_LN("Manual shutdown")
-          doDeepSleep = true;
-        }
-      }
-    } else if (monitoring.luminosity < AMBIANT_LIGHT_TRESHOLD) {
-
-      if (movementSensorStateHasChanged == true) {
-        SERIAL_OUTPUT_LN("Movement event!");
-        movementSensorStateHasChanged = false;
-
-        if (IS_MOVEMENT_DETECTED()) {
-          SERIAL_OUTPUT_LN("Movement is detected");
-          movementDetected = true;
-
-        } else {
-          SERIAL_OUTPUT_LN("No more movement");
-          movementDetected = false;
-        }
-      }
-      ApplyColor();
-
-      if (movementDetected) {
-        doSleep = true;
-      } else {
-        // end of movement detection
-        doDeepSleep = true;
-      }
-
-    } else {
-      SERIAL_OUTPUT_LN("Too much light!");
-      if (!buttonSwitched) {
-        notifyTooMuchLight();
-      }
-      doDeepSleep = true;
-    }
-  } else {
-
-    // button may have been clicked
-    buttonSwitched = false;
-
-    // /!\ low power
+  switch (lampState) {
+  case LampState::LowBattery:
     notifyLowPower();
-    doDeepSleep = true;
+    break;
+  case LampState::ColorSelect:
+    if (!selectNextColor())
+      return; // new color kept: next loop re-evaluates light and motion
+    break;
+  case LampState::TooBright:
+    notifyTooMuchLight();
+    break;
+  case LampState::NightMotion:
+    ApplyColor();
+    delay(10);
+    IdleSleep(); // PWM keeps running; any interrupt wakes up
+    return;
+  case LampState::NightIdle:
+    break;
   }
 
   delay(10);
-  if (doDeepSleep) {
-    sendPowerAtNextCycle = true;
-    DeepSleep();
-  } else if (doSleep) {
-    // forever, but with active PWM
-    // will be sendPowerAtNextCycle at least by end of movement event
-    IdleSleep();
-  }
+  sendPowerAtNextCycle = true;
+  DeepSleep();
 }
